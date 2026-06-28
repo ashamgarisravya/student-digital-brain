@@ -8,6 +8,7 @@ def get_app_status() -> dict[str, object]:
         "mode": "Offline-first",
         "backend": "Not connected",
         "last_sync": "Local only",
+        "storage": "Local workspace",
     }
 
 
@@ -20,6 +21,11 @@ def get_dashboard_stats() -> dict[str, Any]:
             "Quizzes": "0",
             "Revisions": "0",
         },
+        "topics": [
+            {"topic": "Photosynthesis", "subject": "Biology", "items": 0},
+            {"topic": "Newton's laws", "subject": "Physics", "items": 0},
+            {"topic": "Chemical bonding", "subject": "Chemistry", "items": 0},
+        ],
         "subjects": [
             {"subject": "Biology", "completion": 0},
             {"subject": "Physics", "completion": 0},
@@ -54,15 +60,37 @@ def get_progress_data() -> dict[str, Any]:
 
 
 def process_document(file: Any, metadata: dict[str, object] | None = None) -> dict[str, object]:
-    return {"ok": True, "message": "Document queued.", "file_name": getattr(file, "name", "document"), "metadata": metadata or {}}
+    file_name = file.get("name", "document") if isinstance(file, dict) else getattr(file, "name", "document")
+    return {
+        "ok": True,
+        "message": "Document queued.",
+        "file_name": file_name,
+        "status": "queued",
+        "backend_function": "process_document",
+        "metadata": metadata or {},
+    }
 
 
 def process_image(file: Any, metadata: dict[str, object] | None = None) -> dict[str, object]:
-    return {"ok": True, "message": "Image queued.", "file_name": getattr(file, "name", "image"), "metadata": metadata or {}}
+    return {
+        "ok": True,
+        "message": "Image queued.",
+        "file_name": getattr(file, "name", "image"),
+        "status": "queued",
+        "backend_function": "process_image",
+        "metadata": metadata or {},
+    }
 
 
 def process_audio(file: Any, metadata: dict[str, object] | None = None) -> dict[str, object]:
-    return {"ok": True, "message": "Audio queued.", "file_name": getattr(file, "name", "audio"), "metadata": metadata or {}}
+    return {
+        "ok": True,
+        "message": "Audio queued.",
+        "file_name": getattr(file, "name", "audio"),
+        "status": "queued",
+        "backend_function": "process_audio",
+        "metadata": metadata or {},
+    }
 
 
 def search_topics(topic: str, filters: dict[str, object] | None = None) -> list[dict[str, object]]:
@@ -90,6 +118,7 @@ def _search_results(search_type: str, value: str, filters: dict[str, object]) ->
             "source": "Backend placeholder",
             "score": 94,
             "snippet": "Search results will be returned by backend retrieval when connected.",
+            "backend_response": {"search_type": search_type, "query": query, "filters": filters},
         },
         {
             "id": f"{search_type}-result-2",
@@ -98,12 +127,16 @@ def _search_results(search_type: str, value: str, filters: dict[str, object]) ->
             "source": "Backend placeholder",
             "score": 81,
             "snippet": f"Filters received by the frontend contract: {filters}",
+            "backend_response": {"search_type": search_type, "query": query, "rank": 2},
         },
     ]
 
 
 def build_knowledge_graph(subject: str | None = None, topic: str | None = None) -> dict[str, Any]:
     return {
+        "ok": True,
+        "backend_function": "build_knowledge_graph",
+        "filters": {"subject": subject, "topic": topic},
         "nodes": [
             {"id": "photosynthesis", "label": "Photosynthesis", "subject": "Biology", "position": [0.1, 0.8]},
             {"id": "chlorophyll", "label": "Chlorophyll", "subject": "Biology", "position": [0.38, 0.58]},
@@ -131,6 +164,7 @@ def generate_revision_plan(subject: str, exam_date: object, daily_minutes: int, 
             "work": f"Review uploaded concepts, mark weak areas, and collect {focus_text}.",
             "minutes": daily_minutes,
             "load": 35,
+            "backend_function": "generate_revision_plan",
         },
         {
             "day": "Day 2",
@@ -138,6 +172,7 @@ def generate_revision_plan(subject: str, exam_date: object, daily_minutes: int, 
             "work": "Answer generated questions and revisit every missed definition.",
             "minutes": daily_minutes,
             "load": 65,
+            "backend_function": "generate_revision_plan",
         },
         {
             "day": "Day 3",
@@ -145,6 +180,7 @@ def generate_revision_plan(subject: str, exam_date: object, daily_minutes: int, 
             "work": "Run a mixed quiz, summarize gaps, and export the final checklist.",
             "minutes": daily_minutes,
             "load": 85,
+            "backend_function": "generate_revision_plan",
         },
     ]
 
@@ -156,6 +192,8 @@ def generate_quiz(subject: str, question_count: int, difficulty: str, modes: lis
             "options": ["Stored definition", "Unrelated term", "File metadata", "Upload status"],
             "answer": "Stored definition",
             "source": f"{difficulty} | {', '.join(modes) if modes else 'General'} | Backend placeholder",
+            "explanation": "Real explanations will come from generate_quiz() once the backend is connected.",
+            "backend_function": "generate_quiz",
         }
         for _ in range(question_count)
     ]
