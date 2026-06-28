@@ -1,5 +1,4 @@
-"
-""Public API facade for NeuroNote backend.
+"""Public API facade for NeuroNote backend.
 
 This module provides a clean, unified interface for the frontend
 to interact with all backend services without needing to know
@@ -329,6 +328,166 @@ Extract and respond with JSON:
             Search results.
         """
         return self.search(query=keyword, search_type=search_type, limit=limit)
+
+    def upload_and_process(
+        self,
+        file_path: str,
+        subject_name: str = "General",
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """Upload and process a document.
+
+        Args:
+            file_path: Path to the uploaded file.
+            subject_name: Subject to associate with.
+            metadata: Optional metadata (image_type, etc.).
+
+        Returns:
+            Processing result with document_id and status.
+        """
+        from pathlib import Path
+        file_path_obj = Path(file_path)
+        return self.processor.process_file(
+            file_path=file_path_obj,
+            subject_name=subject_name,
+            metadata=metadata,
+        )
+
+    def search(
+        self,
+        query: str,
+        search_type: str = "all",
+        subject_id: Optional[int] = None,
+        file_type: Optional[str] = None,
+        limit: int = 50,
+    ) -> Dict[str, Any]:
+        """Search across all knowledge.
+
+        Args:
+            query: Search query string.
+            search_type: 'all', 'documents', 'definitions', or 'questions'.
+            subject_id: Optional subject filter.
+            file_type: Optional file type filter.
+            limit: Maximum results.
+
+        Returns:
+            Search results with 'results' and 'total'.
+        """
+        return self.search_engine.search(
+            query=query,
+            search_type=search_type,
+            subject_id=subject_id,
+            file_type=file_type,
+            limit=limit,
+        )
+
+    def get_suggestions(self, prefix: str, limit: int = 10) -> List[str]:
+        """Get autocomplete suggestions.
+
+        Args:
+            prefix: Search prefix.
+            limit: Maximum suggestions.
+
+        Returns:
+            List of suggestion strings.
+        """
+        return self.search_engine.get_suggestions(prefix, limit)
+
+    def generate_quiz(
+        self,
+        subject_id: int,
+        topic_id: Optional[int] = None,
+        count: int = 10,
+        difficulty: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """Generate quiz questions.
+
+        Args:
+            subject_id: Subject ID.
+            topic_id: Optional topic filter.
+            count: Number of questions.
+            difficulty: Optional difficulty.
+
+        Returns:
+            List of question dicts.
+        """
+        return self.quiz_service.generate_questions(
+            subject_id=subject_id,
+            topic_id=topic_id,
+            count=count,
+            difficulty=difficulty,
+        )
+
+    def submit_quiz(
+        self,
+        subject_id: int,
+        questions: List[Dict[str, Any]],
+        answers: List[str],
+        topic_id: Optional[int] = None,
+        duration_seconds: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        """Submit a completed quiz.
+
+        Args:
+            subject_id: Subject ID.
+            questions: List of question dicts.
+            answers: List of user answers.
+            topic_id: Optional topic ID.
+            duration_seconds: Time taken.
+
+        Returns:
+            Score and results.
+        """
+        return self.quiz_service.submit_quiz(
+            subject_id=subject_id,
+            topic_id=topic_id,
+            questions=questions,
+            answers=answers,
+            duration_seconds=duration_seconds,
+        )
+
+    def create_revision_plan(
+        self,
+        subject_id: int,
+        available_days: int,
+        hours_per_day: float = 2.0,
+    ) -> List[Dict[str, Any]]:
+        """Create a revision plan.
+
+        Args:
+            subject_id: Subject ID.
+            available_days: Days until exam.
+            hours_per_day: Study hours per day.
+
+        Returns:
+            List of revision sessions.
+        """
+        return self.revision_service.generate_revision_plan(
+            subject_id=subject_id,
+            available_days=available_days,
+            hours_per_day=hours_per_day,
+        )
+
+    def get_knowledge_graph(
+        self, subject_id: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """Get knowledge graph data for visualization.
+
+        Args:
+            subject_id: Optional subject filter.
+
+        Returns:
+            Dict with 'nodes' and 'edges' lists.
+        """
+        from src.database.repository import (
+            get_knowledge_graph_edges,
+            search_definitions,
+        )
+
+        definitions = search_definitions(query="", subject_id=subject_id, limit=1000)
+        edges = get_knowledge_graph_edges(subject_id=subject_id, limit=500)
+
+        return self.graph_builder.build_from_database(definitions, edges)
 
     def get_dashboard_stats(self) -> Dict[str, Any]:
         """Get dashboard statistics.

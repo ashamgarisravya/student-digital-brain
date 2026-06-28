@@ -1,1 +1,1 @@
-    """Search module for NeuroNote."""
+"""Search module for NeuroNote."""
