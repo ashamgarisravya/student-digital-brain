@@ -1,13 +1,13 @@
 import streamlit as st
 
 from components.sidebar import render_sidebar
-from pages.Dashboard import render_dashboard
+from pages.dashboard import render_dashboard
 from pages.Knowledge_Graph import render_graph
-from pages.Quiz import render_quiz
-from pages.Revision import render_revision
-from pages.Search import render_search
-from pages.Settings import render_settings
-from pages.Upload import render_upload
+from pages.quiz import render_quiz
+from pages.revision import render_revision
+from pages.search import render_search
+from pages.settings import render_settings
+from pages.upload import render_upload
 from services.backend_placeholders import get_app_status
 
 
