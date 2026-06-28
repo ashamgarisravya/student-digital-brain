@@ -4,7 +4,8 @@ import time
 
 import streamlit as st
 
-from components.cards import page_header
+from components.cards import backend_response_panel, empty_state, page_header
+from components.notifications import notify_success
 from components.search_box import render_search_controls
 from services.backend_placeholders import search_keyword, search_subject, search_topics
 
@@ -14,6 +15,9 @@ def render_search() -> None:
         "Search",
         "Search concepts, definitions, source snippets, and relationships across local study material.",
     )
+
+    if "search_results" not in st.session_state:
+        st.session_state.search_results = []
 
     controls = render_search_controls()
     if st.button("Search", type="primary"):
@@ -35,14 +39,17 @@ def render_search() -> None:
             if keyword:
                 results.extend(search_keyword(keyword, controls))
 
+        st.session_state.search_results = results
         if not results:
-            st.info("No matching results yet. Upload and process study material to populate search.")
+            empty_state("No matching results", "Upload and process study material to populate search.")
             return
 
-        st.success(f"Found {len(results)} relevant results.")
-        for item in results:
-            with st.container(border=True):
-                st.markdown(f"**{item['title']}**")
-                st.caption(f"{item['subject']} | {item['source']} | Relevance {item['score']}%")
-                st.write(item["snippet"])
-                st.button("Open source", key=f"open-{item['id']}")
+        notify_success(f"Found {len(results)} relevant results.")
+
+    for item in st.session_state.search_results:
+        with st.container(border=True):
+            st.markdown(f"**{item['title']}**")
+            st.caption(f"{item['subject']} | {item['source']} | Relevance {item['score']}%")
+            st.write(item["snippet"])
+            st.button("Open source", key=f"open-{item['id']}")
+            backend_response_panel("Result backend payload", item.get("backend_response"))

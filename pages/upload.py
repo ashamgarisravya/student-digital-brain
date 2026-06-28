@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import streamlit as st
 
-from components.cards import page_header
+from components.cards import backend_response_panel, page_header
+from components.notifications import notify_error, notify_success
 from components.uploader import render_upload_panel
 from services.backend_placeholders import process_audio, process_document, process_image
 
@@ -50,12 +51,16 @@ def render_upload() -> None:
         topic = st.text_input("Topic", key="text-topic", placeholder="Example: Photosynthesis")
         text = st.text_area("Paste notes", height=220, placeholder="Paste class notes, definitions, or assignment text.")
         if st.button("Save text note", type="primary", disabled=not text.strip()):
+            progress = st.progress(0, text="Preparing text note")
             with st.spinner("Sending text to process_document()..."):
+                progress.progress(60, text="Calling process_document()")
                 result = process_document(
                     file={"name": "manual-text-note.txt", "content": text},
                     metadata={"kind": "text", "subject": subject, "topic": topic},
                 )
+                progress.progress(100, text="Text note queued")
             if result.get("ok"):
-                st.success("Text note queued for backend processing.")
+                notify_success("Text note queued for backend processing.")
             else:
-                st.error("Text note could not be queued.")
+                notify_error("Text note could not be queued.")
+            backend_response_panel("Text backend response", result)

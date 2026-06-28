@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from components.cards import info_card, page_header, status_strip
+from components.cards import backend_response_panel, info_card, page_header, status_strip
 from components.progress import render_activity_table, render_subject_progress
 from services.backend_placeholders import get_dashboard_stats
 
@@ -15,6 +15,7 @@ def render_dashboard() -> None:
 
     data = get_dashboard_stats()
     status_strip(data["metrics"])
+    backend_response_panel("Dashboard backend response", data)
 
     st.divider()
     left, right = st.columns([1.35, 1])
@@ -35,6 +36,9 @@ def render_dashboard() -> None:
     with right:
         st.subheader("Progress")
         render_subject_progress(data["subjects"])
+        st.subheader("Topics")
+        for topic in data["topics"]:
+            st.caption(f"{topic['subject']} | {topic['topic']} | {topic['items']} items")
         st.divider()
         st.subheader("Next actions")
         for action in data["next_actions"]:

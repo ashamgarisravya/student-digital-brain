@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from components.cards import page_header
+from components.cards import backend_response_panel, page_header, status_strip
 from components.graph_view import render_graph_view
 from services.backend_placeholders import build_knowledge_graph
 
@@ -19,4 +19,12 @@ def render_graph() -> None:
 
     with st.spinner("Building graph visualization..."):
         graph = build_knowledge_graph(subject=subject or None, topic=topic or None)
+    status_strip(
+        {
+            "Nodes": str(len(graph.get("nodes", []))),
+            "Links": str(len(graph.get("edges", []))),
+            "Source": str(graph.get("backend_function", "backend")),
+        }
+    )
     render_graph_view(graph)
+    backend_response_panel("Graph backend response", graph)
