@@ -1,10 +1,8 @@
 """Document processing orchestration service for NeuroNote."""
 
-import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from src.config import config
 from src.database.repository import (
     create_document,
     get_or_create_subject,
@@ -147,7 +145,6 @@ class DocumentProcessor:
         # Extract text and metadata
         extractor = PDFExtractor(file_path)
         pdf_metadata = extractor.get_metadata()
-        pages = extractor.extract_text()
         raw_text = extractor.extract_all_text()
 
         # Clean and chunk text
@@ -161,7 +158,9 @@ class DocumentProcessor:
         for idx, chunk in enumerate(chunks):
             logger.info(
                 "Processing chunk %d/%d for doc %d",
-                idx + 1, len(chunks), doc_id,
+                idx + 1,
+                len(chunks),
+                doc_id,
             )
             try:
                 extraction = self._extract_knowledge(chunk, subject_id)

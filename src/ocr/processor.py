@@ -1,7 +1,7 @@
 """OCR text extraction using Tesseract with image preprocessing."""
 
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Tuple
 
 from src.config import config
 from src.utils.exceptions import OCRError
@@ -19,6 +19,7 @@ class OCRProcessor:
     def _check_tesseract(self) -> None:
         """Verify Tesseract is installed and accessible."""
         import shutil
+
         if not shutil.which(self.tesseract_cmd):
             raise OCRError(
                 f"Tesseract not found at '{self.tesseract_cmd}'. "
@@ -40,9 +41,7 @@ class OCRProcessor:
             import cv2
             import numpy as np
         except ImportError:
-            logger.warning(
-                "OpenCV not installed; skipping image preprocessing"
-            )
+            logger.warning("OpenCV not installed; skipping image preprocessing")
             return None
 
         img = cv2.imread(str(image_path))
@@ -56,9 +55,7 @@ class OCRProcessor:
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         # 2. Binarization using OTSU threshold
-        _, binary = cv2.threshold(
-            gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU
-        )
+        _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
 
         # 3. Denoising
         denoised = cv2.fastNlMeansDenoising(binary, h=30)
@@ -74,7 +71,9 @@ class OCRProcessor:
                 center = (w // 2, h // 2)
                 matrix = cv2.getRotationMatrix2D(center, angle, 1.0)
                 denoised = cv2.warpAffine(
-                    denoised, matrix, (w, h),
+                    denoised,
+                    matrix,
+                    (w, h),
                     flags=cv2.INTER_CUBIC,
                     borderMode=cv2.BORDER_REPLICATE,
                 )
@@ -104,9 +103,7 @@ class OCRProcessor:
         try:
             import pytesseract
         except ImportError:
-            raise OCRError(
-                "pytesseract is not installed. Install with: pip install pytesseract"
-            )
+            raise OCRError("pytesseract is not installed. Install with: pip install pytesseract")
 
         self._check_tesseract()
         pytesseract.pytesseract.tesseract_cmd = self.tesseract_cmd
@@ -132,17 +129,11 @@ class OCRProcessor:
             if preprocess and config.ocr.preprocessing_enabled:
                 processed_img = self.preprocess_image(image_path)
                 if processed_img is not None:
-                    text = pytesseract.image_to_string(
-                        processed_img, config=tess_config
-                    )
+                    text = pytesseract.image_to_string(processed_img, config=tess_config)
                 else:
-                    text = pytesseract.image_to_string(
-                        str(image_path), config=tess_config
-                    )
+                    text = pytesseract.image_to_string(str(image_path), config=tess_config)
             else:
-                text = pytesseract.image_to_string(
-                    str(image_path), config=tess_config
-                )
+                text = pytesseract.image_to_string(str(image_path), config=tess_config)
 
             cleaned = text.strip()
             char_count = len(cleaned)
@@ -190,8 +181,10 @@ class OCRProcessor:
         pytesseract.pytesseract.tesseract_cmd = self.tesseract_cmd
 
         psm_map = {
-            "printed": 6, "handwritten": 6,
-            "whiteboard": 3, "screenshot": 6,
+            "printed": 6,
+            "handwritten": 6,
+            "whiteboard": 3,
+            "screenshot": 6,
         }
         tess_config = (
             f"--oem {config.ocr.oem_mode} "
@@ -203,17 +196,10 @@ class OCRProcessor:
             data = pytesseract.image_to_data(
                 str(image_path), config=tess_config, output_type=pytesseract.Output.DICT
             )
-            confidences = [
-                int(c) for c in data["conf"]
-                if c != "-1" and int(c) > 0
-            ]
-            avg_confidence = (
-                sum(confidences) / len(confidences)
-                if confidences else 0.0
-            )
+            confidences = [int(c) for c in data["conf"] if c != "-1" and int(c) > 0]
+            avg_confidence = sum(confidences) / len(confidences) if confidences else 0.0
             text = " ".join(
-                data["text"][i] for i in range(len(data["text"]))
-                if data["text"][i].strip()
+                data["text"][i] for i in range(len(data["text"])) if data["text"][i].strip()
             )
             return text.strip(), avg_confidence
 

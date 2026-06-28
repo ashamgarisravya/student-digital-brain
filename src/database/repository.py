@@ -1,11 +1,10 @@
 """Repository layer for NeuroNote database operations."""
 
 import json
-from datetime import date, datetime
-from typing import Any, Dict, List, Optional, Tuple
+from datetime import date
+from typing import Any, Dict, List, Optional
 
 from src.database.connection import get_db
-from src.utils.exceptions import DatabaseError
 from src.utils.logging import setup_logging
 
 logger = setup_logging(__name__)
@@ -14,6 +13,7 @@ logger = setup_logging(__name__)
 # ──────────────────────────────────────────────
 # Documents
 # ──────────────────────────────────────────────
+
 
 def create_document(
     title: str,
@@ -163,6 +163,7 @@ def get_document_stats() -> Dict[str, Any]:
 # Subjects
 # ──────────────────────────────────────────────
 
+
 def create_subject(name: str, description: Optional[str] = None) -> int:
     """Create a new subject.
 
@@ -192,15 +193,11 @@ def get_or_create_subject(name: str) -> int:
         Subject ID.
     """
     with get_db() as conn:
-        cursor = conn.execute(
-            "SELECT id FROM subjects WHERE name = ?", (name,)
-        )
+        cursor = conn.execute("SELECT id FROM subjects WHERE name = ?", (name,))
         row = cursor.fetchone()
         if row:
             return row["id"]
-        cursor = conn.execute(
-            "INSERT INTO subjects (name) VALUES (?)", (name,)
-        )
+        cursor = conn.execute("INSERT INTO subjects (name) VALUES (?)", (name,))
         return cursor.lastrowid
 
 
@@ -227,6 +224,7 @@ def get_all_subjects() -> List[Dict[str, Any]]:
 # ──────────────────────────────────────────────
 # Topics
 # ──────────────────────────────────────────────
+
 
 def create_topic(
     name: str,
@@ -283,6 +281,7 @@ def get_topics_by_subject(subject_id: int) -> List[Dict[str, Any]]:
 # Definitions
 # ──────────────────────────────────────────────
 
+
 def create_definition(
     term: str,
     definition: str,
@@ -313,8 +312,7 @@ def create_definition(
             """INSERT INTO definitions (term, definition, subject_id,
                topic_id, document_id, importance, context, source_page)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-            (term, definition, subject_id, topic_id, document_id,
-             importance, context, source_page),
+            (term, definition, subject_id, topic_id, document_id, importance, context, source_page),
         )
         return cursor.lastrowid
 
@@ -365,6 +363,7 @@ def search_definitions(
 # Questions
 # ──────────────────────────────────────────────
 
+
 def create_question(
     question_text: str,
     answer: str,
@@ -399,8 +398,17 @@ def create_question(
                question_type, difficulty, subject_id, topic_id,
                document_id, explanation)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (question_text, answer, options_json, question_type,
-             difficulty, subject_id, topic_id, document_id, explanation),
+            (
+                question_text,
+                answer,
+                options_json,
+                question_type,
+                difficulty,
+                subject_id,
+                topic_id,
+                document_id,
+                explanation,
+            ),
         )
         return cursor.lastrowid
 
@@ -451,6 +459,7 @@ def get_questions_for_quiz(
 # Knowledge Links
 # ──────────────────────────────────────────────
 
+
 def create_knowledge_link(
     source_concept_id: int,
     target_concept_id: int,
@@ -475,8 +484,7 @@ def create_knowledge_link(
                    (source_concept_id, target_concept_id,
                     relationship_type, weight)
                    VALUES (?, ?, ?, ?)""",
-                (source_concept_id, target_concept_id,
-                 relationship_type, weight),
+                (source_concept_id, target_concept_id, relationship_type, weight),
             )
             return cursor.lastrowid or 0
         except Exception as e:
@@ -524,6 +532,7 @@ def get_knowledge_graph_edges(
 # Quiz History
 # ──────────────────────────────────────────────
 
+
 def save_quiz_result(
     subject_id: Optional[int],
     topic_id: Optional[int],
@@ -555,17 +564,21 @@ def save_quiz_result(
                question_count, correct_count, score_percentage,
                questions, answers, duration_seconds)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-            (subject_id, topic_id, question_count, correct_count,
-             score_percentage, json.dumps(questions),
-             json.dumps(answers) if answers else None,
-             duration_seconds),
+            (
+                subject_id,
+                topic_id,
+                question_count,
+                correct_count,
+                score_percentage,
+                json.dumps(questions),
+                json.dumps(answers) if answers else None,
+                duration_seconds,
+            ),
         )
         return cursor.lastrowid
 
 
-def get_quiz_history(
-    subject_id: Optional[int] = None, limit: int = 20
-) -> List[Dict[str, Any]]:
+def get_quiz_history(subject_id: Optional[int] = None, limit: int = 20) -> List[Dict[str, Any]]:
     """Get quiz attempt history.
 
     Args:
@@ -591,6 +604,7 @@ def get_quiz_history(
 # ──────────────────────────────────────────────
 # Revision History
 # ──────────────────────────────────────────────
+
 
 def create_revision_session(
     subject_id: int,

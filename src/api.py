@@ -8,7 +8,6 @@ the internal module structure.
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from src.config import config
 from src.database.repository import get_all_subjects, get_document_stats
 from src.graph.builder import KnowledgeGraphBuilder
 from src.search.engine import SearchEngine
@@ -46,6 +45,7 @@ class NeuroNoteAPI:
             ensure_directories()
 
             from src.database.schema import initialize_database
+
             initialize_database()
 
             logger.info("NeuroNote API initialized successfully")
@@ -70,7 +70,9 @@ class NeuroNoteAPI:
         """
         return self.upload_and_process(file_path, subject_name)
 
-    def process_image(self, file_path: str, subject_name: str = "General", image_type: str = "printed") -> Dict[str, Any]:
+    def process_image(
+        self, file_path: str, subject_name: str = "General", image_type: str = "printed"
+    ) -> Dict[str, Any]:
         """Process an image file with OCR.
 
         Args:
@@ -109,10 +111,10 @@ class NeuroNoteAPI:
             Extracted text string.
         """
         from pathlib import Path
+
         from src.ingestion.pdf_extractor import PDFExtractor
         from src.ocr.processor import OCRProcessor
         from src.speech.transcriber import WhisperTranscriber
-        from src.utils.file_utils import validate_file
 
         file_path_obj = Path(file_path)
         file_type, _ = validate_file(file_path_obj)
@@ -231,7 +233,9 @@ Extract and respond with JSON:
             "important_questions": [],
         }
 
-    def save_document(self, title: str, file_type: str, file_path: str, subject_name: str = "General") -> int:
+    def save_document(
+        self, title: str, file_type: str, file_path: str, subject_name: str = "General"
+    ) -> int:
         """Save a document record to database.
 
         Args:
@@ -244,6 +248,7 @@ Extract and respond with JSON:
             Document ID.
         """
         from pathlib import Path
+
         from src.database.repository import create_document, get_or_create_subject
 
         subject_id = get_or_create_subject(subject_name)
@@ -269,7 +274,9 @@ Extract and respond with JSON:
         """
         return self.get_knowledge_graph(subject_id)
 
-    def search_topics(self, query: str, subject_id: Optional[int] = None, limit: int = 20) -> List[Dict[str, Any]]:
+    def search_topics(
+        self, query: str, subject_id: Optional[int] = None, limit: int = 20
+    ) -> List[Dict[str, Any]]:
         """Search for topics.
 
         Args:
@@ -309,14 +316,13 @@ Extract and respond with JSON:
         from src.database.connection import get_db
 
         with get_db() as conn:
-            cursor = conn.execute(
-                "SELECT * FROM subjects WHERE name = ?",
-                (subject_name,)
-            )
+            cursor = conn.execute("SELECT * FROM subjects WHERE name = ?", (subject_name,))
             row = cursor.fetchone()
             return dict(row) if row else None
 
-    def search_keyword(self, keyword: str, search_type: str = "all", limit: int = 20) -> Dict[str, Any]:
+    def search_keyword(
+        self, keyword: str, search_type: str = "all", limit: int = 20
+    ) -> Dict[str, Any]:
         """Search by keyword across all content.
 
         Args:
@@ -346,6 +352,7 @@ Extract and respond with JSON:
             Processing result with document_id and status.
         """
         from pathlib import Path
+
         file_path_obj = Path(file_path)
         return self.processor.process_file(
             file_path=file_path_obj,
@@ -468,9 +475,7 @@ Extract and respond with JSON:
             hours_per_day=hours_per_day,
         )
 
-    def get_knowledge_graph(
-        self, subject_id: Optional[int] = None
-    ) -> Dict[str, Any]:
+    def get_knowledge_graph(self, subject_id: Optional[int] = None) -> Dict[str, Any]:
         """Get knowledge graph data for visualization.
 
         Args:

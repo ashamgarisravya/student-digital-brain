@@ -1,7 +1,7 @@
 """PDF text and image extraction using PyMuPDF."""
 
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List
 
 from src.utils.exceptions import PDFExtractionError
 from src.utils.logging import setup_logging
@@ -43,11 +43,13 @@ class PDFExtractor:
             for page_num in range(len(self._document)):
                 page = self._document[page_num]
                 text = page.get_text()
-                pages.append({
-                    "page": page_num + 1,
-                    "text": text,
-                    "char_count": len(text),
-                })
+                pages.append(
+                    {
+                        "page": page_num + 1,
+                        "text": text,
+                        "char_count": len(text),
+                    }
+                )
                 logger.debug(
                     "Extracted page %d: %d characters",
                     page_num + 1,
@@ -92,14 +94,16 @@ class PDFExtractor:
                     xref = img[0]
                     base_image = self._document.extract_image(xref)
                     image_bytes = base_image["image"]
-                    images.append({
-                        "page": page_num + 1,
-                        "image_index": img_idx,
-                        "width": base_image["width"],
-                        "height": base_image["height"],
-                        "image_bytes": image_bytes,
-                        "extension": base_image["ext"],
-                    })
+                    images.append(
+                        {
+                            "page": page_num + 1,
+                            "image_index": img_idx,
+                            "width": base_image["width"],
+                            "height": base_image["height"],
+                            "image_bytes": image_bytes,
+                            "extension": base_image["ext"],
+                        }
+                    )
                     logger.debug(
                         "Extracted image %d from page %d (%dx%d)",
                         img_idx,
@@ -110,9 +114,7 @@ class PDFExtractor:
             return images
 
         except Exception as e:
-            raise PDFExtractionError(
-                f"Failed to extract PDF images: {e}"
-            )
+            raise PDFExtractionError(f"Failed to extract PDF images: {e}")
         finally:
             if self._document:
                 self._document.close()
@@ -140,9 +142,7 @@ class PDFExtractor:
                 "format": metadata.get("format", ""),
             }
         except Exception as e:
-            raise PDFExtractionError(
-                f"Failed to get PDF metadata: {e}"
-            )
+            raise PDFExtractionError(f"Failed to get PDF metadata: {e}")
         finally:
             if self._document:
                 self._document.close()

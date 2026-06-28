@@ -1,6 +1,5 @@
 """SQLite database schema and initialization for NeuroNote."""
 
-import sqlite3
 from typing import List
 
 from src.database.connection import get_db
@@ -256,7 +255,5 @@ def get_table_names() -> List[str]:
     """
     with get_db() as conn:
         cursor = conn.cursor()
-        cursor.execute(
-            "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;"
-        )
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;")
         return [row["name"] for row in cursor.fetchall()]

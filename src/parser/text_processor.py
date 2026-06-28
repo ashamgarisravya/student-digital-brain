@@ -33,10 +33,10 @@ class TextProcessor:
             return ""
 
         # Remove page numbers (common patterns)
-        text = re.sub(r'\n\s*\d+\s*\n', '\n', text)
+        text = re.sub(r"\n\s*\d+\s*\n", "\n", text)
 
         # Remove headers/footers (short lines at start/end of pages)
-        lines = text.split('\n')
+        lines = text.split("\n")
         cleaned_lines = []
         for line in lines:
             stripped = line.strip()
@@ -45,21 +45,22 @@ class TextProcessor:
                 continue
             cleaned_lines.append(line)
 
-        text = '\n'.join(cleaned_lines)
+        text = "\n".join(cleaned_lines)
 
         # Normalize whitespace
-        text = re.sub(r' +', ' ', text)
-        text = re.sub(r'\n{3,}', '\n\n', text)
+        text = re.sub(r" +", " ", text)
+        text = re.sub(r"\n{3,}", "\n\n", text)
 
         # Normalize Unicode (NFKC normalization)
         import unicodedata
-        text = unicodedata.normalize('NFKC', text)
+
+        text = unicodedata.normalize("NFKC", text)
 
         # Remove null bytes and control characters
-        text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', text)
+        text = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", text)
 
         # Replace special whitespace characters
-        text = text.replace('\r\n', '\n').replace('\r', '\n')
+        text = text.replace("\r\n", "\n").replace("\r", "\n")
 
         return text.strip()
 
@@ -92,7 +93,7 @@ class TextProcessor:
             return []
 
         # Split into paragraphs first
-        paragraphs = re.split(r'\n\n+', text)
+        paragraphs = re.split(r"\n\n+", text)
         paragraphs = [p.strip() for p in paragraphs if p.strip()]
 
         chunks: List[str] = []
@@ -106,12 +107,12 @@ class TextProcessor:
             if para_tokens > self.chunk_size:
                 # Flush current chunk first
                 if current_chunk:
-                    chunks.append('\n\n'.join(current_chunk))
+                    chunks.append("\n\n".join(current_chunk))
                     current_chunk = []
                     current_tokens = 0
 
                 # Split large paragraph into smaller pieces
-                sentences = re.split(r'(?<=[.!?])\s+', paragraph)
+                sentences = re.split(r"(?<=[.!?])\s+", paragraph)
                 temp_chunk: List[str] = []
                 temp_tokens = 0
 
@@ -119,37 +120,33 @@ class TextProcessor:
                     sent_tokens = self._estimate_tokens(sentence)
                     if temp_tokens + sent_tokens > self.chunk_size:
                         if temp_chunk:
-                            chunks.append(' '.join(temp_chunk))
+                            chunks.append(" ".join(temp_chunk))
                         # Keep overlap by retaining last sentences
                         overlap_count = max(
-                            1,
-                            int(len(temp_chunk) * (self.chunk_overlap / self.chunk_size))
+                            1, int(len(temp_chunk) * (self.chunk_overlap / self.chunk_size))
                         )
                         temp_chunk = temp_chunk[-overlap_count:] if overlap_count > 0 else []
-                        temp_tokens = self._estimate_tokens(' '.join(temp_chunk))
+                        temp_tokens = self._estimate_tokens(" ".join(temp_chunk))
 
                     temp_chunk.append(sentence)
                     temp_tokens += sent_tokens
 
                 if temp_chunk:
-                    chunks.append(' '.join(temp_chunk))
+                    chunks.append(" ".join(temp_chunk))
                 continue
 
             # Check if adding this paragraph would exceed chunk size
             if current_tokens + para_tokens > self.chunk_size:
                 if current_chunk:
-                    chunks.append('\n\n'.join(current_chunk))
+                    chunks.append("\n\n".join(current_chunk))
 
                 # Keep overlap paragraphs
                 if self.chunk_overlap > 0 and len(current_chunk) > 1:
                     overlap_paras = max(
-                        1,
-                        int(len(current_chunk) * (self.chunk_overlap / self.chunk_size))
+                        1, int(len(current_chunk) * (self.chunk_overlap / self.chunk_size))
                     )
                     current_chunk = current_chunk[-overlap_paras:]
-                    current_tokens = self._estimate_tokens(
-                        '\n\n'.join(current_chunk)
-                    )
+                    current_tokens = self._estimate_tokens("\n\n".join(current_chunk))
                 else:
                     current_chunk = []
                     current_tokens = 0
@@ -159,11 +156,13 @@ class TextProcessor:
 
         # Add final chunk
         if current_chunk:
-            chunks.append('\n\n'.join(current_chunk))
+            chunks.append("\n\n".join(current_chunk))
 
         logger.info(
             "Text split into %d chunks (size=%d, overlap=%d)",
-            len(chunks), self.chunk_size, self.chunk_overlap,
+            len(chunks),
+            self.chunk_size,
+            self.chunk_overlap,
         )
         return chunks
 

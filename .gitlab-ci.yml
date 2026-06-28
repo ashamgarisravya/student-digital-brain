@@ -1,0 +1,80 @@
+stages:
+  - format
+  - lint
+  - typecheck
+  - test
+  - security
+  - audit
+
+variables:
+  UV_CACHE_DIR: ".uv-cache"
+  PIP_CACHE_DIR: ".pip-cache"
+
+.before_script:
+  - python -m pip install --upgrade pip
+  - pip install uv
+  - uv sync
+  - uv sync --group dev
+
+# Format Check
+ruff-format:
+  stage: format
+  image: python:3.11-slim
+  script:
+    - uv run ruff format --check src/ tests/
+  allow_failure: false
+
+# Lint Check
+ruff-lint:
+  stage: lint
+  image: python:3.11-slim
+  script:
+    - uv run ruff check src/ tests/
+  allow_failure: false
+
+# Type Check
+mypy:
+  stage: typecheck
+  image: python:3.11-slim
+  script:
+    - uv run mypy src/ --ignore-missing-imports
+  allow_failure: true
+
+# Unit Tests
+pytest:
+  stage: test
+  image: python:3.11-slim
+  script:
+    - uv run pytest tests/ -v --cov=src --cov-report=xml
+  coverage: '/TOTAL\s+\d+\%\s+\d+/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+  allow_failure: false
+
+# Security Scan
+bandit:
+  stage: security
+  image: python:3.11-slim
+  script:
+    - uv run bandit -r src/ -f json -o bandit-report.json || true
+    - uv run bandit -r src/
+  allow_failure: true
+
+# Dependency Audit
+audit:
+  stage: audit
+  image: python:3.11-slim
+  script:
+    - uv run pip-audit
+  allow_failure: true
+
+# Secret Detection
+detect-secrets:
+  stage: security
+  image: python:3.11-slim
+  script:
+    - uv run detect-secrets scan --baseline .secrets.baseline
+  allow_failure: true

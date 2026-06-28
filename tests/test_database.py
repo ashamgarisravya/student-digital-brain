@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from src.database.connection import close_connection, get_connection, get_db
+from src.database.connection import close_connection, get_connection
 from src.database.repository import (
     create_document,
     create_subject,
@@ -33,6 +33,7 @@ def temp_db(monkeypatch):
 
         # Initialize schema
         from src.database.schema import initialize_database
+
         initialize_database()
 
         yield db_path
@@ -67,7 +68,9 @@ class TestSubjectRepository:
 
     def test_create_subject(self, temp_db):
         """Test creating a new subject."""
-        subject_id = create_subject("Mathematics", "Math and calculus")
+        import uuid
+        unique_name = f"Mathematics_{uuid.uuid4().hex[:8]}"
+        subject_id = create_subject(unique_name, "Math and calculus")
         assert subject_id > 0
 
     def test_get_or_create_subject_new(self, temp_db):
@@ -83,8 +86,11 @@ class TestSubjectRepository:
 
     def test_get_all_subjects(self, temp_db):
         """Test retrieving all subjects."""
-        create_subject("Biology")
-        create_subject("History")
+        import uuid
+        bio_name = f"Biology_{uuid.uuid4().hex[:8]}"
+        hist_name = f"History_{uuid.uuid4().hex[:8]}"
+        create_subject(bio_name)
+        create_subject(hist_name)
         subjects = get_all_subjects()
         assert len(subjects) >= 2
 

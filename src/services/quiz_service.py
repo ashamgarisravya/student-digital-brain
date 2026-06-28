@@ -1,11 +1,8 @@
 """Quiz generation and management service for NeuroNote."""
 
-import json
 import random
-from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from src.config import config
 from src.database.repository import (
     get_questions_for_quiz,
     save_quiz_result,
@@ -72,6 +69,7 @@ class QuizService:
         """
         # Get context from existing definitions
         from src.database.repository import search_definitions
+
         definitions = search_definitions(
             query="",
             subject_id=subject_id,
@@ -83,10 +81,7 @@ class QuizService:
             return []
 
         # Build context text
-        context_text = "\n".join(
-            f"- {d['term']}: {d['definition']}"
-            for d in definitions[:15]
-        )
+        context_text = "\n".join(f"- {d['term']}: {d['definition']}" for d in definitions[:15])
 
         prompt = f"""Generate {count} quiz questions based on the following concepts.
 
@@ -95,7 +90,7 @@ Concepts:
 
 Requirements:
 - Mix of multiple_choice (4 options), true_false, and short_answer questions
-- Difficulty: {difficulty or 'medium'}
+- Difficulty: {difficulty or "medium"}
 - Ensure questions test understanding, not just memorization
 - Include the correct answer and a brief explanation
 
@@ -202,14 +197,16 @@ Respond with JSON array:
             if is_correct:
                 correct_count += 1
 
-            results.append({
-                "question_index": idx,
-                "question": question.get("question_text", ""),
-                "correct_answer": correct_answer,
-                "user_answer": user_answer,
-                "is_correct": is_correct,
-                "explanation": question.get("explanation"),
-            })
+            results.append(
+                {
+                    "question_index": idx,
+                    "question": question.get("question_text", ""),
+                    "correct_answer": correct_answer,
+                    "user_answer": user_answer,
+                    "is_correct": is_correct,
+                    "explanation": question.get("explanation"),
+                }
+            )
 
         total = len(questions)
         score_percentage = (correct_count / total * 100) if total > 0 else 0
@@ -228,7 +225,10 @@ Respond with JSON array:
 
         logger.info(
             "Quiz %d submitted: %d/%d correct (%.1f%%)",
-            quiz_id, correct_count, total, score_percentage,
+            quiz_id,
+            correct_count,
+            total,
+            score_percentage,
         )
 
         return {
@@ -239,9 +239,7 @@ Respond with JSON array:
             "results": results,
         }
 
-    def shuffle_questions(
-        self, questions: List[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+    def shuffle_questions(self, questions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Shuffle questions for variety.
 
         Args:

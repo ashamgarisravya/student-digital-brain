@@ -6,9 +6,7 @@ from typing import Any, Optional
 class NeuroNoteError(Exception):
     """Base exception for all NeuroNote errors."""
 
-    def __init__(
-        self, message: str, details: Optional[Any] = None
-    ) -> None:
+    def __init__(self, message: str, details: Optional[Any] = None) -> None:
         self.message = message
         self.details = details
         super().__init__(self.message)

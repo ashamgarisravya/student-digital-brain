@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Optional
 
 from src.config import config
-from src.utils.exceptions import STTError, ModelNotFoundError
+from src.utils.exceptions import ModelNotFoundError, STTError
 from src.utils.logging import setup_logging
 
 logger = setup_logging(__name__)
@@ -55,11 +55,16 @@ class WhisperTranscriber:
         # Build whisper.cpp command
         cmd = [
             str(self._find_whisper_binary()),
-            "--model", str(self.model_path),
-            "--file", str(audio_path),
-            "--threads", str(config.stt.num_threads),
-            "--max-len", str(config.stt.chunk_seconds),
-            "--language", language or config.stt.language,
+            "--model",
+            str(self.model_path),
+            "--file",
+            str(audio_path),
+            "--threads",
+            str(config.stt.num_threads),
+            "--max-len",
+            str(config.stt.chunk_seconds),
+            "--language",
+            language or config.stt.language,
             "--output-json",
         ]
 
@@ -144,6 +149,7 @@ class WhisperTranscriber:
             Path to the whisper binary.
         """
         import shutil
+
         binary = shutil.which("whisper")
         if binary:
             return binary

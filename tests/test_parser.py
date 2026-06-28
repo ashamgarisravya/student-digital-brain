@@ -1,6 +1,5 @@
 """Tests for parser module."""
 
-import pytest
 
 from src.parser.json_parser import JSONParser
 from src.parser.text_processor import TextProcessor
@@ -137,17 +136,17 @@ class TestJSONParser:
         }
         normalized = self.parser.normalize_concept(concept)
         assert normalized["term"] == "Mitosis"
-        assert normalized["importance"] == "medium"  # Default
+        assert normalized["importance"] == "high"  # Normalized from HIGH
 
     def test_parse_extraction_output_list(self):
         """Test parsing list format output."""
-        raw = '[{"term": "A", "definition": "Def A", "importance": "high"}]'
+        raw = '[{"term": "A", "definition": "Definition A is here", "importance": "high"}]'
         result = self.parser.parse_extraction_output(raw)
         assert len(result["concepts"]) == 1
 
     def test_parse_extraction_output_dict(self):
         """Test parsing dict format output."""
-        raw = '{"concepts": [{"term": "A", "definition": "Def A", "importance": "high"}], "questions": []}'
+        raw = '{"concepts": [{"term": "A", "definition": "Definition A is here", "importance": "high"}], "questions": []}'
         result = self.parser.parse_extraction_output(raw)
         assert len(result["concepts"]) == 1
         assert len(result["questions"]) == 0

@@ -4,7 +4,7 @@ import sqlite3
 import threading
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator
 
 from src.config import config
 from src.utils.logging import setup_logging

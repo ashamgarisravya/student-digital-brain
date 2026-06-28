@@ -7,7 +7,7 @@ for a local, offline application.
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 
 @dataclass
@@ -33,27 +33,21 @@ class ProcessingConfig:
     max_image_size_mb: int = 50
     max_audio_size_mb: int = 500
     max_text_size_mb: int = 10
-    supported_pdf_extensions: List[str] = field(
-        default_factory=lambda: [".pdf"]
-    )
+    supported_pdf_extensions: List[str] = field(default_factory=lambda: [".pdf"])
     supported_image_extensions: List[str] = field(
         default_factory=lambda: [".jpg", ".jpeg", ".png", ".tiff", ".bmp"]
     )
     supported_audio_extensions: List[str] = field(
         default_factory=lambda: [".mp3", ".wav", ".m4a", ".ogg"]
     )
-    supported_text_extensions: List[str] = field(
-        default_factory=lambda: [".txt", ".md"]
-    )
+    supported_text_extensions: List[str] = field(default_factory=lambda: [".txt", ".md"])
 
 
 @dataclass
 class OCRConfig:
     """Tesseract OCR configuration."""
 
-    tesseract_cmd: str = field(
-        default_factory=lambda: os.getenv("TESSERACT_CMD", "tesseract")
-    )
+    tesseract_cmd: str = field(default_factory=lambda: os.getenv("TESSERACT_CMD", "tesseract"))
     language: str = "eng"
     dpi: int = 300
     oem_mode: int = 1  # LSTM neural network engine
@@ -73,9 +67,7 @@ class STTConfig:
     )
     model_name: str = "ggml-small-q5_0"
     language: str = "auto"
-    num_threads: int = field(
-        default_factory=lambda: int(os.getenv("WHISPER_THREADS", "4"))
-    )
+    num_threads: int = field(default_factory=lambda: int(os.getenv("WHISPER_THREADS", "4")))
     chunk_seconds: int = 30
     sample_rate: int = 16000
 
@@ -87,17 +79,11 @@ class LLMConfig:
     model_path: str = field(
         default_factory=lambda: os.getenv(
             "LLM_MODEL_PATH",
-            str(
-                Path.cwd()
-                / "models"
-                / "Phi-3-mini-4k-instruct-q4_k_m.gguf"
-            ),
+            str(Path.cwd() / "models" / "Phi-3-mini-4k-instruct-q4_k_m.gguf"),
         )
     )
     n_ctx: int = 4096
-    n_threads: int = field(
-        default_factory=lambda: int(os.getenv("LLM_THREADS", "4"))
-    )
+    n_threads: int = field(default_factory=lambda: int(os.getenv("LLM_THREADS", "4")))
     n_batch: int = 512
     temperature: float = 0.3
     top_p: float = 0.9
@@ -148,17 +134,11 @@ class SearchConfig:
 class LoggingConfig:
     """Logging configuration."""
 
-    level: str = field(
-        default_factory=lambda: os.getenv("NEURONOTE_LOG_LEVEL", "INFO")
-    )
-    format: str = (
-        "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
-    )
+    level: str = field(default_factory=lambda: os.getenv("NEURONOTE_LOG_LEVEL", "INFO"))
+    format: str = "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
     date_format: str = "%Y-%m-%d %H:%M:%S"
     file_path: Optional[str] = field(
-        default_factory=lambda: os.getenv(
-            "NEURONOTE_LOG_FILE", "logs/neuronote.log"
-        )
+        default_factory=lambda: os.getenv("NEURONOTE_LOG_FILE", "logs/neuronote.log")
     )
     max_file_size_mb: int = 10
     backup_count: int = 5
@@ -174,16 +154,8 @@ class AppConfig:
             str(Path.cwd() / "data"),
         )
     )
-    upload_dir: str = field(
-        default_factory=lambda: str(
-            Path.cwd() / "data" / "uploads"
-        )
-    )
-    processed_dir: str = field(
-        default_factory=lambda: str(
-            Path.cwd() / "data" / "processed"
-        )
-    )
+    upload_dir: str = field(default_factory=lambda: str(Path.cwd() / "data" / "uploads"))
+    processed_dir: str = field(default_factory=lambda: str(Path.cwd() / "data" / "processed"))
     models_dir: str = field(
         default_factory=lambda: os.getenv(
             "NEURONOTE_MODEL_DIR",
@@ -197,9 +169,7 @@ class AppConfig:
     stt: STTConfig = field(default_factory=STTConfig)
     llm: LLMConfig = field(default_factory=LLMConfig)
     chunking: ChunkingConfig = field(default_factory=ChunkingConfig)
-    knowledge_graph: KnowledgeGraphConfig = field(
-        default_factory=KnowledgeGraphConfig
-    )
+    knowledge_graph: KnowledgeGraphConfig = field(default_factory=KnowledgeGraphConfig)
     search: SearchConfig = field(default_factory=SearchConfig)
     logging: LoggingConfig = field(default_factory=LoggingConfig)
 

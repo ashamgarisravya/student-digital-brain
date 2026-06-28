@@ -22,21 +22,26 @@ class KnowledgeGraphBuilder:
     @property
     def _graph_available(self) -> bool:
         """Check if NetworkX is available."""
-        try:
-            import networkx as nx
-            return True
-        except ImportError:
-            return False
+        import importlib.util
+
+        return importlib.util.find_spec("networkx") is not None
 
     def _get_graph(self):
         """Get or initialize the NetworkX graph."""
         if self._graph is None:
             import networkx as nx
+
             self._graph = nx.Graph()
         return self._graph
 
-    def add_concept(self, concept_id: int, term: str, definition: str,
-                    subject: str = "", importance: str = "medium") -> None:
+    def add_concept(
+        self,
+        concept_id: int,
+        term: str,
+        definition: str,
+        subject: str = "",
+        importance: str = "medium",
+    ) -> None:
         """Add a concept node to the graph.
 
         Args:
@@ -46,8 +51,8 @@ class KnowledgeGraphBuilder:
             subject: Subject area.
             importance: Importance level.
         """
-        G = self._get_graph()
-        G.add_node(
+        graph = self._get_graph()
+        graph.add_node(
             concept_id,
             term=term,
             definition=definition,
@@ -70,17 +75,16 @@ class KnowledgeGraphBuilder:
             relationship_type: Type of relationship.
             weight: Relationship strength.
         """
-        G = self._get_graph()
-        if G.has_node(source_id) and G.has_node(target_id):
-            G.add_edge(
-                source_id, target_id,
+        graph = self._get_graph()
+        if graph.has_node(source_id) and graph.has_node(target_id):
+            graph.add_edge(
+                source_id,
+                target_id,
                 relationship=relationship_type,
                 weight=weight,
             )
 
-    def compute_similarity(
-        self, text1: str, text2: str
-    ) -> float:
+    def compute_similarity(self, text1: str, text2: str) -> float:
         """Compute cosine similarity between two texts using TF-IDF.
 
         Args:
@@ -94,9 +98,7 @@ class KnowledgeGraphBuilder:
             from sklearn.feature_extraction.text import TfidfVectorizer
             from sklearn.metrics.pairwise import cosine_similarity
         except ImportError:
-            logger.warning(
-                "scikit-learn not installed; using fallback similarity"
-            )
+            logger.warning("scikit-learn not installed; using fallback similarity")
             return self._fallback_similarity(text1, text2)
 
         vectorizer = TfidfVectorizer(
@@ -119,8 +121,9 @@ class KnowledgeGraphBuilder:
             Similarity score between 0.0 and 1.0.
         """
         import re
-        words1 = set(re.findall(r'\w+', text1.lower()))
-        words2 = set(re.findall(r'\w+', text2.lower()))
+
+        words1 = set(re.findall(r"\w+", text1.lower()))
+        words2 = set(re.findall(r"\w+", text2.lower()))
         if not words1 or not words2:
             return 0.0
         intersection = words1.intersection(words2)
@@ -128,8 +131,7 @@ class KnowledgeGraphBuilder:
         return len(intersection) / len(union) if union else 0.0
 
     def find_related_concepts(
-        self, new_concept: Dict[str, Any],
-        existing_concepts: List[Dict[str, Any]]
+        self, new_concept: Dict[str, Any], existing_concepts: List[Dict[str, Any]]
     ) -> List[Tuple[int, str, float]]:
         """Find existing concepts related to a new concept.
 
@@ -206,7 +208,7 @@ class KnowledgeGraphBuilder:
         Returns:
             Dict with 'nodes' and 'edges' lists for visualization.
         """
-        G = self._get_graph()
+        graph = self._get_graph()
 
         # Add all concept nodes
         for defn in definitions:
@@ -230,14 +232,17 @@ class KnowledgeGraphBuilder:
 
         # Auto-link similar concepts
         concept_list = [
-            {"id": n, "term": G.nodes[n].get("term", ""),
-             "definition": G.nodes[n].get("definition", "")}
-            for n in G.nodes()
+            {
+                "id": n,
+                "term": graph.nodes[n].get("term", ""),
+                "definition": graph.nodes[n].get("definition", ""),
+            }
+            for n in graph.nodes()
         ]
 
         for i, c1 in enumerate(concept_list):
-            for c2 in concept_list[i + 1:]:
-                if not G.has_edge(c1["id"], c2["id"]):
+            for c2 in concept_list[i + 1 :]:
+                if not graph.has_edge(c1["id"], c2["id"]):
                     similarity = self.compute_similarity(
                         f"{c1['term']} {c1['definition']}",
                         f"{c2['term']} {c2['definition']}",
@@ -258,7 +263,7 @@ class KnowledgeGraphBuilder:
         Returns:
             Dict with 'nodes' and 'edges' lists.
         """
-        G = self._get_graph()
+        graph = self._get_graph()
         nodes = [
             {
                 "id": n,
@@ -266,7 +271,7 @@ class KnowledgeGraphBuilder:
                 "subject": data.get("subject", ""),
                 "importance": data.get("importance", "medium"),
             }
-            for n, data in G.nodes(data=True)
+            for n, data in graph.nodes(data=True)
         ]
         edges = [
             {
@@ -275,17 +280,19 @@ class KnowledgeGraphBuilder:
                 "relationship": data.get("relationship", "related_to"),
                 "weight": data.get("weight", 1.0),
             }
-            for u, v, data in G.edges(data=True)
+            for u, v, data in graph.edges(data=True)
         ]
         return {
             "nodes": nodes,
             "edges": edges,
             "stats": {
-                "node_count": G.number_of_nodes(),
-                "edge_count": G.number_of_edges(),
+                "node_count": graph.number_of_nodes(),
+                "edge_count": graph.number_of_edges(),
                 "density": round(
-                    G.number_of_edges() / (G.number_of_nodes() * (G.number_of_nodes() - 1) / 2)
-                    if G.number_of_nodes() > 1 else 0, 4
+                    graph.number_of_edges() / (graph.number_of_nodes() * (graph.number_of_nodes() - 1) / 2)
+                    if graph.number_of_nodes() > 1
+                    else 0,
+                    4,
                 ),
             },
         }
@@ -297,9 +304,10 @@ class KnowledgeGraphBuilder:
             Dict with node_count, edge_count, density, etc.
         """
         import networkx as nx
-        G = self._get_graph()
+
+        graph = self._get_graph()
         return {
-            "node_count": G.number_of_nodes(),
-            "edge_count": G.number_of_edges(),
-            "density": round(nx.density(G), 4) if self._graph_available else 0,
+            "node_count": graph.number_of_nodes(),
+            "edge_count": graph.number_of_edges(),
+            "density": round(nx.density(graph), 4) if self._graph_available else 0,
         }

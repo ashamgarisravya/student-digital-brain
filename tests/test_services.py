@@ -1,8 +1,6 @@
 """Tests for services module."""
 
-import pytest
 
-from src.parser.json_parser import JSONParser
 from src.services.quiz_service import QuizService
 from src.services.revision_service import RevisionService
 
@@ -65,9 +63,7 @@ class TestRevisionService:
 
     def test_generate_revision_plan_empty_topics(self):
         """Test plan generation with no topics."""
-        plan = self.revision_service.generate_revision_plan(
-            subject_id=999, available_days=7
-        )
+        plan = self.revision_service.generate_revision_plan(subject_id=999, available_days=7)
         assert plan == []
 
     def test_mark_completed_invalid_session(self):

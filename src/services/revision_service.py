@@ -1,10 +1,8 @@
 """Revision planning service for NeuroNote."""
 
-import json
 from datetime import date, timedelta
 from typing import Any, Dict, List, Optional
 
-from src.config import config
 from src.database.repository import (
     create_revision_session,
     get_revision_plan,
@@ -59,9 +57,7 @@ class RevisionService:
         for topic in topics:
             # Allocate minutes proportional to definition count
             def_count = topic.get("definition_count", 1)
-            allocated_minutes = int(
-                (def_count / total_definitions) * total_minutes
-            )
+            allocated_minutes = int((def_count / total_definitions) * total_minutes)
             allocated_minutes = max(allocated_minutes, 30)  # Minimum 30 min
 
             # Create revision session
@@ -88,7 +84,9 @@ class RevisionService:
 
         logger.info(
             "Generated revision plan for subject %d: %d sessions over %d days",
-            subject_id, len(plan), available_days,
+            subject_id,
+            len(plan),
+            available_days,
         )
         return plan
 
@@ -113,9 +111,7 @@ class RevisionService:
 
         return get_revision_plan(subject_id, start, end)
 
-    def mark_completed(
-        self, session_id: int, notes: Optional[str] = None
-    ) -> bool:
+    def mark_completed(self, session_id: int, notes: Optional[str] = None) -> bool:
         """Mark a revision session as completed.
 
         Args:
@@ -127,13 +123,18 @@ class RevisionService:
         """
         try:
             from src.database.connection import get_db
+
             with get_db() as conn:
-                conn.execute(
+                cursor = conn.execute(
                     """UPDATE revision_history
                        SET completed = 1, notes = ?
                        WHERE id = ?""",
                     (notes, session_id),
                 )
+                # Check if any row was actually updated
+                if cursor.rowcount == 0:
+                    logger.warning("Revision session %d not found", session_id)
+                    return False
             logger.info("Revision session %d marked completed", session_id)
             return True
         except Exception as e:

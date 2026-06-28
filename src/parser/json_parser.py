@@ -104,19 +104,18 @@ class JSONParser:
 
         if "difficulty" in question:
             if question["difficulty"] not in self.VALID_DIFFICULTY:
-                errors.append(
-                    f"'difficulty' must be one of {self.VALID_DIFFICULTY}"
-                )
+                errors.append(f"'difficulty' must be one of {self.VALID_DIFFICULTY}")
 
-        if "options" in question and question.get("type") == "multiple_choice":
-            if not isinstance(question["options"], list) or len(question["options"]) < 2:
+        # For multiple choice, options are required
+        if question.get("type") == "multiple_choice":
+            if "options" not in question:
+                errors.append("'options' is required for multiple_choice questions")
+            elif not isinstance(question["options"], list) or len(question["options"]) < 2:
                 errors.append("'options' must be a list with at least 2 items for MCQs")
 
         return len(errors) == 0, errors
 
-    def validate_concept_list(
-        self, data: Any
-    ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    def validate_concept_list(self, data: Any) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         """Validate a list of concepts from LLM output.
 
         Args:
@@ -145,7 +144,10 @@ class JSONParser:
 
         logger.info(
             "Validated %d/%d concepts (valid=%d, invalid=%d)",
-            len(data), len(data), len(valid), len(invalid),
+            len(data),
+            len(data),
+            len(valid),
+            len(invalid),
         )
         return valid, invalid
 
@@ -158,19 +160,24 @@ class JSONParser:
         Returns:
             Normalized concept dict.
         """
+        importance = concept.get("importance", "medium")
+        # Normalize importance to lowercase
+        if isinstance(importance, str):
+            importance = importance.lower()
+            if importance not in self.VALID_IMPORTANCE:
+                importance = "medium"
+
         return {
             "term": concept.get("term", "").strip(),
             "definition": concept.get("definition", "").strip(),
             "subject": concept.get("subject", ""),
-            "importance": concept.get("importance", "medium"),
+            "importance": importance,
             "related_concepts": concept.get("related_concepts", []),
             "context": concept.get("context"),
             "source_page": concept.get("source_page"),
         }
 
-    def parse_extraction_output(
-        self, raw_json: str
-    ) -> Dict[str, Any]:
+    def parse_extraction_output(self, raw_json: str) -> Dict[str, Any]:
         """Parse full LLM extraction output.
 
         Handles both single document and batch formats.

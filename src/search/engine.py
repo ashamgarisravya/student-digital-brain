@@ -107,16 +107,18 @@ class SearchEngine:
                 cursor = conn.execute(sql, params)
                 results = []
                 for row in cursor.fetchall():
-                    results.append({
-                        "type": "document",
-                        "id": row["id"],
-                        "title": row["title"],
-                        "file_type": row["file_type"],
-                        "subject": row["subject_name"],
-                        "snippet": row["snippet"],
-                        "rank": row["rank"],
-                        "created_at": row["created_at"],
-                    })
+                    results.append(
+                        {
+                            "type": "document",
+                            "id": row["id"],
+                            "title": row["title"],
+                            "file_type": row["file_type"],
+                            "subject": row["subject_name"],
+                            "snippet": row["snippet"],
+                            "rank": row["rank"],
+                            "created_at": row["created_at"],
+                        }
+                    )
                 return results
 
         except Exception as e:
@@ -161,16 +163,18 @@ class SearchEngine:
                 cursor = conn.execute(sql, params)
                 results = []
                 for row in cursor.fetchall():
-                    results.append({
-                        "type": "definition",
-                        "id": row["id"],
-                        "title": row["term"],
-                        "content": row["definition"],
-                        "subject": row["subject_name"],
-                        "topic": row["topic_name"],
-                        "importance": row["importance"],
-                        "rank": 1.0 if row["importance"] == "high" else 0.8,
-                    })
+                    results.append(
+                        {
+                            "type": "definition",
+                            "id": row["id"],
+                            "title": row["term"],
+                            "content": row["definition"],
+                            "subject": row["subject_name"],
+                            "topic": row["topic_name"],
+                            "importance": row["importance"],
+                            "rank": 1.0 if row["importance"] == "high" else 0.8,
+                        }
+                    )
                 return results
 
         except Exception as e:
@@ -214,15 +218,17 @@ class SearchEngine:
                 cursor = conn.execute(sql, params)
                 results = []
                 for row in cursor.fetchall():
-                    results.append({
-                        "type": "question",
-                        "id": row["id"],
-                        "title": row["question_text"][:100],
-                        "content": row["answer"],
-                        "subject": row["subject_name"],
-                        "difficulty": row["difficulty"],
-                        "rank": 0.9,
-                    })
+                    results.append(
+                        {
+                            "type": "question",
+                            "id": row["id"],
+                            "title": row["question_text"][:100],
+                            "content": row["answer"],
+                            "subject": row["subject_name"],
+                            "difficulty": row["difficulty"],
+                            "rank": 0.9,
+                        }
+                    )
                 return results
 
         except Exception as e:

@@ -3,7 +3,7 @@
 import json
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Generator
+from typing import Any, Dict, Generator, List, Optional
 
 from src.config import config
 from src.utils.exceptions import LLMError, ModelNotFoundError
@@ -37,8 +37,7 @@ class LLMEngine:
             from llama_cpp import Llama
         except ImportError:
             raise LLMError(
-                "llama-cpp-python is not installed. "
-                "Install with: pip install llama-cpp-python"
+                "llama-cpp-python is not installed. Install with: pip install llama-cpp-python"
             )
 
         self._check_model()
@@ -127,9 +126,7 @@ class LLMEngine:
         except Exception as e:
             raise LLMError(f"LLM inference failed: {e}")
 
-    def _generate_complete(
-        self, params: Dict[str, Any], start_time: float
-    ) -> Dict[str, Any]:
+    def _generate_complete(self, params: Dict[str, Any], start_time: float) -> Dict[str, Any]:
         """Run complete (non-streaming) inference."""
         output = self._model.create_completion(**params)
         elapsed = time.time() - start_time
@@ -141,7 +138,9 @@ class LLMEngine:
 
         logger.debug(
             "Inference: %d tokens in %.2fs (%.1f t/s)",
-            tokens_used, elapsed, tokens_per_second,
+            tokens_used,
+            elapsed,
+            tokens_per_second,
         )
 
         return {
@@ -203,7 +202,9 @@ class LLMEngine:
                 last_error = str(e)
                 logger.warning(
                     "JSON parse failed (attempt %d/%d): %s",
-                    attempt + 1, max_retries, e,
+                    attempt + 1,
+                    max_retries,
+                    e,
                 )
                 continue
 
@@ -232,12 +233,12 @@ class LLMEngine:
         start = text.find("{")
         end = text.rfind("}")
         if start != -1 and end != -1:
-            return text[start:end + 1]
+            return text[start : end + 1]
 
         # For JSON arrays
         start = text.find("[")
         end = text.rfind("]")
         if start != -1 and end != -1:
-            return text[start:end + 1]
+            return text[start : end + 1]
 
         return text.strip()
