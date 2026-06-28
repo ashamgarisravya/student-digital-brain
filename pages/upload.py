@@ -4,6 +4,7 @@ import streamlit as st
 
 from components.cards import backend_response_panel, page_header
 from components.notifications import notify_error, notify_success
+from components.progress import render_processing_progress
 from components.uploader import render_upload_panel
 from services.backend_placeholders import process_audio, process_document, process_image
 
@@ -51,14 +52,18 @@ def render_upload() -> None:
         topic = st.text_input("Topic", key="text-topic", placeholder="Example: Photosynthesis")
         text = st.text_area("Paste notes", height=220, placeholder="Paste class notes, definitions, or assignment text.")
         if st.button("Save text note", type="primary", disabled=not text.strip()):
-            progress = st.progress(0, text="Preparing text note")
+            progress_slot = st.empty()
+            with progress_slot:
+                render_processing_progress(0, "Preparing text note")
             with st.spinner("Sending text to process_document()..."):
-                progress.progress(60, text="Calling process_document()")
+                with progress_slot:
+                    render_processing_progress(60, "Calling process_document()")
                 result = process_document(
                     file={"name": "manual-text-note.txt", "content": text},
                     metadata={"kind": "text", "subject": subject, "topic": topic},
                 )
-                progress.progress(100, text="Text note queued")
+                with progress_slot:
+                    render_processing_progress(100, "Text note queued")
             if result.get("ok"):
                 notify_success("Text note queued for backend processing.")
             else:
