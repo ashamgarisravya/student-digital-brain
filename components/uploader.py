@@ -6,6 +6,7 @@ import streamlit as st
 
 from components.cards import backend_response_panel
 from components.notifications import notify_error, notify_success
+from components.progress import render_processing_progress
 
 
 def render_upload_panel(
@@ -43,11 +44,14 @@ def render_upload_panel(
             notify_error(f"Select {max_files} files or fewer.")
             return
 
-        progress = st.progress(0, text="Preparing upload")
+        progress_slot = st.empty()
+        with progress_slot:
+            render_processing_progress(0, "Preparing upload")
         with st.spinner("Sending files to the local processing queue..."):
             results = []
             for index, file in enumerate(files, start=1):
-                progress.progress(int(index / len(files) * 100), text=f"Processing {file.name}")
+                with progress_slot:
+                    render_processing_progress(int(index / len(files) * 100), f"Processing {file.name}")
                 results.append(
                     processor(
                         file=file,
