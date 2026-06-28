@@ -1,93 +1,273 @@
-# student-digital-brain
+# NeuroNote - Offline Student Digital Brain
 
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![License](https://img.shields.io/badge/license-GPL--3.0-green)
+![Python](https://img.shields.io/badge/python-3.10%2B-yellow)
+![Status](https://img.shields.io/badge/status-planning-orange)
 
+**Your Personal AI Learning Brain that works completely Offline.**
 
-## Getting started
+---
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## 📖 Project Overview
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+NeuroNote is an offline-first, CPU-based AI system designed for students to transform scattered educational material into a structured, searchable knowledge base. The system ingests PDFs, images, handwritten notes, audio recordings, and plain text, processes them entirely on-device using open-source AI models, and provides instant retrieval, revision planning, and quiz generation — all without any internet connection.
 
-## Add your files
+---
 
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+## ❗ Problem Statement
+
+Students accumulate vast amounts of study material across multiple formats:
+
+- PDF textbooks and research papers
+- Handwritten class notes
+- Lecture audio recordings
+- Whiteboard photographs
+- Digital text notes and assignments
+- Scanned documents
+
+During exam preparation, finding specific concepts, definitions, or connections across this scattered material becomes a significant challenge. Existing solutions either require cloud connectivity, compromise privacy, or fail to intelligently structure extracted knowledge.
+
+---
+
+## 💡 Solution
+
+NeuroNote solves this by providing a completely offline, CPU-first pipeline that:
+
+1. **Ingests** multiple input formats (PDF, images, audio, text)
+2. **Extracts** text via OCR (Tesseract) and speech-to-text (Whisper.cpp)
+3. **Processes** content using a local small language model (Phi-3 Mini GGUF via llama.cpp)
+4. **Structures** extracted knowledge into JSON and SQLite
+5. **Connects** related concepts into a Knowledge Graph (NetworkX)
+6. **Enables** instant search, revision planning, and quiz generation
+
+---
+
+## ✨ Features
+
+| Category | Feature | Description |
+|---|---|---|
+| **Input Processing** | PDF Extraction | Extract text and images from PDF documents using PyMuPDF |
+| | OCR | Optical Character Recognition for handwritten/scanned text via Tesseract |
+| | Speech-to-Text | Offline audio transcription using Whisper.cpp |
+| | Text Ingestion | Accept plain text notes directly |
+| **AI Processing** | Local LLM | Concept extraction and knowledge structuring using Phi-3 Mini |
+| | JSON Structuring | Convert raw text into structured JSON with defined schemas |
+| | Knowledge Linking | Connect related concepts across documents |
+| | Zero-Shot Classification | Topic categorization without training data |
+| **Storage** | SQLite Database | All data stored locally in a portable SQLite database |
+| | JSON Export | Structured knowledge export in JSON format |
+| | Local Models | All AI models stored and executed locally |
+| **Retrieval** | Full-Text Search | Search across all processed content |
+| | Topic Search | Filter and search by subject/topic |
+| | Concept Search | Find specific definitions and concepts |
+| **Learning Tools** | Revision Planner | Generate study plans based on content |
+| | Quiz Generator | Create practice questions from your notes |
+| | Knowledge Graph | Visualize concept relationships (NetworkX) |
+| **Privacy** | 100% Offline | No data ever leaves your machine |
+| | No Cloud APIs | No OpenAI, Anthropic, or any external services |
+| | Local Storage | All data stored on your local machine |
+
+---
+
+## 🏗️ Architecture
 
 ```
-cd existing_repo
-git remote add origin https://code.swecha.org/Bharatg/student-digital-brain.git
-git branch -M main
-git push -uf origin main
+┌─────────────────────────────────────────────────────────────┐
+│                        User Interface                        │
+│                      (Streamlit Web App)                      │
+├──────────┬──────────┬──────────┬──────────┬─────────────────┤
+│   PDF    │  Image   │  Audio   │   Text   │   Dashboard     │
+│  Upload  │  Upload  │  Upload  │  Input   │   & Search      │
+└────┬─────┴────┬─────┴────┬─────┴────┬─────┴────────┬────────┘
+     │          │          │          │              │
+     ▼          ▼          ▼          ▼              ▼
+┌──────────────────────────────────────────────────────────────┐
+│                    Processing Layer                           │
+├──────────┬──────────┬──────────┬──────────────────────────────┤
+│ PyMuPDF  │ Tesseract│Whisper.cpp│    Text Preprocessing       │
+│ (PDF)    │  (OCR)   │  (STT)   │    (Cleaning, Chunking)     │
+└──────────┴──────────┴──────────┴──────────────────────────────┘
+               │                    │
+               ▼                    ▼
+┌──────────────────────────────────────────────────────────────┐
+│                    AI Processing Layer                        │
+├──────────────────────────────────────────────────────────────┤
+│         llama.cpp + Phi-3 Mini GGUF                          │
+│    (Concept Extraction, JSON Structuring,                    │
+│     Knowledge Linking, Question Generation)                  │
+└──────────────────────────────────────────────────────────────┘
+               │
+               ▼
+┌──────────────────────────────────────────────────────────────┐
+│                    Storage Layer                              │
+├──────────────────────┬───────────────────────────────────────┤
+│     SQLite Database   │      JSON Files                      │
+│   (Documents, Topics, │   (Structured Knowledge              │
+│    Definitions, Quiz  │    Export / Backup)                   │
+│    History, etc.)     │                                       │
+├──────────────────────┴───────────────────────────────────────┤
+│                  Knowledge Graph (NetworkX)                   │
+└──────────────────────────────────────────────────────────────┘
+               │
+               ▼
+┌──────────────────────────────────────────────────────────────┐
+│                    Retrieval Layer                            │
+├──────────┬──────────┬──────────┬──────────┬─────────────────┤
+│ Full-Text│  Topic   │ Concept  │ Revision │  Quiz Display   │
+│  Search  │  Search  │  Search  │ Planner  │                 │
+└──────────┴──────────┴──────────┴──────────┴─────────────────┘
 ```
 
-## Integrate with your tools
+---
 
-* [Set up project integrations](https://code.swecha.org/Bharatg/student-digital-brain/-/settings/integrations)
+## 🛠️ Technology Stack
 
-## Collaborate with your team
+| Technology | Purpose | Version |
+|---|---|---|
+| **Python** | Core programming language | 3.10+ |
+| **Streamlit** | Web-based user interface | Latest |
+| **SQLite** | Local database storage | Built-in |
+| **Tesseract OCR** | Optical Character Recognition | Latest |
+| **Whisper.cpp** | Offline speech-to-text | Latest |
+| **llama.cpp** | Local LLM inference engine | Latest |
+| **Phi-3 Mini GGUF** | Small language model (3.8B params) | Q4_K_M |
+| **PyMuPDF** | PDF text and image extraction | Latest |
+| **NetworkX** | Knowledge graph construction | Latest |
 
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+---
 
-## Test and Deploy
+## 📁 Folder Structure
 
-Use the built-in continuous integration in GitLab.
+```
+student-digital-brain/
+├── README.md                    # Project overview and documentation
+├── LICENSE                      # GPL-3.0 License
+├── SPEC.md                      # Technical specification
+├── CONTRIBUTING.md              # Contribution guidelines
+├── CHANGELOG.md                 # Version history
+├── .gitignore                   # Git ignore rules
+├── SECURITY.md                  # Security and privacy policy
+├── ISSUE_PLAN.md               # GitLab issue tracker plan
+├── TEAM_PLAN.md                 # Team responsibilities and timeline
+├── MILESTONES.md               # Project milestones
+├── ROADMAP.md                   # Development roadmap
+├── SYSTEM_DESIGN.md             # High-level system design
+├── DEMO_PLAN.md                 # Demo sequence plan
+├── PROJECT_CHECKLIST.md         # Project completion checklist
+├── DECISIONS.md                 # Architectural decision records
+├── docs/
+│   ├── architecture.md          # Detailed system architecture
+│   ├── workflow.md              # User workflow documentation
+│   ├── database.md              # Database schema documentation
+│   ├── ai_pipeline.md           # AI processing pipeline
+│   ├── json_schema.md           # JSON schema definitions
+│   ├── project_structure.md     # Detailed folder structure
+│   └── future_scope.md          # Future roadmap and enhancements
+├── src/                         # Application source code
+│   └── __init__.py
+├── models/                      # Local AI model files (GGUF)
+├── database/                    # Database management module
+│   └── __init__.py
+├── data/                        # Application data (uploads, outputs)
+│   ├── uploads/
+│   ├── processed/
+│   └── output/
+├── assets/                      # Static assets (icons, images)
+├── tests/                       # Unit tests and integration tests
+│   └── __init__.py
+├── scripts/                     # Utility scripts
+└── examples/                    # Usage examples and sample data
+```
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
+---
 
-***
+## 🚀 Installation
 
-# Editing this README
+> **Note:** Installation instructions will be finalized in Phase 2 (MVP). Placeholder for hackathon Phase 1 planning.
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### Prerequisites
 
-## Suggestions for a good README
+```bash
+# Python 3.10 or higher
+python --version
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+# Tesseract OCR (install system package)
+# Windows: Download from GitHub releases
+# Linux: sudo apt install tesseract-ocr
+# macOS: brew install tesseract
 
-## Name
-Choose a self-explaining name for your project.
+# Download Phi-3 Mini GGUF model
+# Place in models/ directory
+```
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+### Setup
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+```bash
+# Clone the repository
+git clone https://code.swecha.org/Bharatg/student-digital-brain.git
+cd student-digital-brain
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Linux/macOS
+venv\Scripts\activate     # Windows
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+# Install dependencies (will be finalized in Phase 2)
+pip install -r requirements.txt
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+# Run the application
+streamlit run src/app.py
+```
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+---
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+## 🔮 Future Scope
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+| Phase | Feature | Description |
+|---|---|---|
+| **Phase 2** | MVP | Core pipeline: PDF upload, OCR, text extraction, basic search |
+| **Phase 3** | AI Integration | LLM integration, concept extraction, JSON structuring, knowledge graph |
+| **Phase 4** | Learning Tools | Quiz generator, revision planner, knowledge graph visualization |
+| **Phase 5+** | Advanced Features | Multi-language support, handwriting recognition improvements, collaborative features, mobile adaptation |
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+---
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+## 📄 License
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**.
 
-## License
-For open source projects, say how it is licensed.
+```
+Copyright (C) 2026 NeuroNote Team
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+```
+
+See [LICENSE](LICENSE) for the full license text.
+
+---
+
+## 👥 Team Members
+
+| Member | Role | Responsibilities |
+|---|---|---|
+| **Member A** | Backend Developer | Database, OCR, LLM, Knowledge Graph, Testing |
+| **Member B** | Frontend Developer | Streamlit UI, Audio, File Upload, Search, Dashboard, Documentation |
+
+---
+
+## 🙏 Acknowledgments
+
+- [Streamlit](https://streamlit.io/) for the amazing web framework
+- [llama.cpp](https://github.com/ggerganov/llama.cpp) for CPU-first LLM inference
+- [Whisper.cpp](https://github.com/ggerganov/whisper.cpp) for offline speech recognition
+- [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) for OCR capabilities
+- [NetworkX](https://networkx.org/) for knowledge graph support
+- [Phi-3 Mini](https://huggingface.co/microsoft/Phi-3-mini-4k-instruct) for local AI processing
+- All open-source contributors who make offline AI possible
