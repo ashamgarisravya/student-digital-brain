@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import streamlit as st
 
-from components.cards import page_header
-from services.backend_placeholders import save_settings
+from components.cards import backend_response_panel, page_header, status_strip
+from services.backend_placeholders import get_app_status, save_settings
 
 
 def render_settings() -> None:
@@ -11,6 +11,9 @@ def render_settings() -> None:
         "Settings",
         "Configure local-only behavior, processing defaults, and future backend paths.",
     )
+
+    status = get_app_status()
+    status_strip({"Mode": str(status["mode"]), "Backend": str(status["backend"]), "Storage": str(status["storage"])})
 
     with st.form("settings"):
         st.subheader("Model selection")
@@ -46,3 +49,4 @@ def render_settings() -> None:
             st.success(result["message"])
         else:
             st.error(result["message"])
+        backend_response_panel("Settings backend response", result)

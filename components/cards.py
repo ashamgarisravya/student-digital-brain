@@ -32,3 +32,23 @@ def status_strip(items: dict[str, str]) -> None:
     cols = st.columns(len(items))
     for col, (label, value) in zip(cols, items.items()):
         col.metric(label, value)
+
+
+def backend_response_panel(title: str, response: object) -> None:
+    if response is None:
+        return
+
+    with st.expander(title):
+        st.json(response)
+
+
+def empty_state(title: str, body: str) -> None:
+    st.markdown(
+        f"""
+        <div class="nn-card">
+            <div class="nn-card-title">{html.escape(title)}</div>
+            <div class="nn-card-body">{html.escape(body)}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )

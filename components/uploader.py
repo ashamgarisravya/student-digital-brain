@@ -4,6 +4,7 @@ from typing import Iterable
 
 import streamlit as st
 
+from components.cards import backend_response_panel
 from components.notifications import notify_error, notify_success
 
 
@@ -64,3 +65,4 @@ def render_upload_panel(
             notify_error(f"{len(failed)} upload item failed.")
         else:
             notify_success(f"Queued {len(results)} {upload_kind} item(s) for backend processing.")
+        backend_response_panel(f"{title} backend responses", results)
