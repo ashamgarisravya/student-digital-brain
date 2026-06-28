@@ -4,6 +4,10 @@ import pandas as pd
 import streamlit as st
 
 
+def render_processing_progress(value: int, text: str) -> None:
+    st.progress(max(0, min(100, value)), text=text)
+
+
 def render_subject_progress(progress_rows: list[dict[str, object]]) -> None:
     if not progress_rows:
         st.info("Progress data will appear after the backend records study sessions.")
