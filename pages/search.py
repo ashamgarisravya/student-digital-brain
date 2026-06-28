@@ -6,7 +6,7 @@ import streamlit as st
 
 from components.cards import page_header
 from components.search_box import render_search_controls
-from services.backend_placeholders import search_knowledge_base
+from services.backend_placeholders import search_keyword, search_subject, search_topics
 
 
 def render_search() -> None:
@@ -17,13 +17,23 @@ def render_search() -> None:
 
     controls = render_search_controls()
     if st.button("Search", type="primary"):
-        if not str(controls["query"]).strip():
-            st.warning("Enter a search query first.")
+        subject = str(controls["subject"]).strip()
+        topic = str(controls["topic"]).strip()
+        keyword = str(controls["keyword"]).strip()
+
+        if not any([subject, topic, keyword]):
+            st.warning("Enter a subject, topic, or keyword first.")
             return
 
         with st.spinner("Searching the local knowledge index..."):
             time.sleep(0.4)
-            results = search_knowledge_base(controls)
+            results = []
+            if subject:
+                results.extend(search_subject(subject, controls))
+            if topic:
+                results.extend(search_topics(topic, controls))
+            if keyword:
+                results.extend(search_keyword(keyword, controls))
 
         if not results:
             st.info("No matching results yet. Upload and process study material to populate search.")

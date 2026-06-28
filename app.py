@@ -1,27 +1,23 @@
 import streamlit as st
 
 from components.sidebar import render_sidebar
-from pages.dashboard import render_dashboard
-from pages.graph import render_graph
-from pages.progress import render_progress
-from pages.quiz import render_quiz
-from pages.revision import render_revision
-from pages.search import render_search
-from pages.settings import render_settings
-from pages.upload import render_upload_audio, render_upload_documents, render_upload_images
+from pages.Dashboard import render_dashboard
+from pages.Knowledge_Graph import render_graph
+from pages.Quiz import render_quiz
+from pages.Revision import render_revision
+from pages.Search import render_search
+from pages.Settings import render_settings
+from pages.Upload import render_upload
 from services.backend_placeholders import get_app_status
 
 
 PAGES = {
     "Dashboard": render_dashboard,
-    "Upload Documents": render_upload_documents,
-    "Upload Images": render_upload_images,
-    "Upload Audio": render_upload_audio,
+    "Upload": render_upload,
     "Search": render_search,
     "Knowledge Graph": render_graph,
-    "Revision Planner": render_revision,
     "Quiz Generator": render_quiz,
-    "Progress": render_progress,
+    "Revision Planner": render_revision,
     "Settings": render_settings,
 }
 
@@ -37,7 +33,7 @@ def configure_page() -> None:
         """
         <style>
         :root {
-            --nn-bg: #f7f7f4;
+            --nn-bg: #f7f8f6;
             --nn-ink: #18211f;
             --nn-muted: #63706d;
             --nn-line: #d9ded8;
@@ -50,6 +46,10 @@ def configure_page() -> None:
             padding-top: 1.7rem;
             padding-bottom: 2.5rem;
             max-width: 1240px;
+        }
+        section[data-testid="stSidebar"] {
+            background: #f2f4f0;
+            border-right: 1px solid var(--nn-line);
         }
         h1, h2, h3 {
             letter-spacing: 0;

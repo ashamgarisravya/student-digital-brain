@@ -4,7 +4,7 @@ import streamlit as st
 
 from components.cards import info_card, page_header, status_strip
 from components.progress import render_activity_table, render_subject_progress
-from services.backend_placeholders import get_dashboard_data, get_progress_data
+from services.backend_placeholders import get_dashboard_stats
 
 
 def render_dashboard() -> None:
@@ -13,7 +13,7 @@ def render_dashboard() -> None:
         "A calm command center for uploads, search, revision, and learning progress.",
     )
 
-    data = get_dashboard_data()
+    data = get_dashboard_stats()
     status_strip(data["metrics"])
 
     st.divider()
@@ -23,7 +23,7 @@ def render_dashboard() -> None:
         st.subheader("Today")
         cols = st.columns(3)
         with cols[0]:
-            info_card("Upload", "Add PDFs, images, or lecture audio to the local processing queue.", ["PDF", "OCR", "Audio"])
+            info_card("Upload", "Add PDFs, images, lecture audio, or text notes to the processing queue.", ["PDF", "Images", "Audio", "Text"])
         with cols[1]:
             info_card("Search", "Find concepts, definitions, and source material across your knowledge base.", ["FTS ready"])
         with cols[2]:
@@ -34,8 +34,7 @@ def render_dashboard() -> None:
 
     with right:
         st.subheader("Progress")
-        progress_data = get_progress_data()
-        render_subject_progress(progress_data["subjects"])
+        render_subject_progress(data["subjects"])
         st.divider()
         st.subheader("Next actions")
         for action in data["next_actions"]:

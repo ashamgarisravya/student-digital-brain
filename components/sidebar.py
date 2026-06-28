@@ -5,14 +5,11 @@ import streamlit as st
 
 NAV_ITEMS = [
     "Dashboard",
-    "Upload Documents",
-    "Upload Images",
-    "Upload Audio",
+    "Upload",
     "Search",
     "Knowledge Graph",
-    "Revision Planner",
     "Quiz Generator",
-    "Progress",
+    "Revision Planner",
     "Settings",
 ]
 
@@ -29,5 +26,5 @@ def render_sidebar(status: dict[str, object]) -> str:
         st.caption(f"Backend: {status['backend']}")
         st.caption(f"Last sync: {status['last_sync']}")
         st.divider()
-        st.caption("Frontend-only scaffold. Backend services can be connected through `services/backend_placeholders.py`.")
+        st.caption("Frontend-only app. Backend functions are isolated in `services/backend_placeholders.py`.")
     return selected

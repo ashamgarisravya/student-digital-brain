@@ -13,15 +13,20 @@ def render_settings() -> None:
     )
 
     with st.form("settings"):
-        st.subheader("Privacy")
-        offline_only = st.toggle("Offline-only mode", value=True)
-        telemetry = st.toggle("Usage telemetry", value=False, disabled=True)
+        st.subheader("Model selection")
+        model = st.selectbox("Local model", ["Phi-3 Mini GGUF", "TinyLlama GGUF", "Custom GGUF"])
+        model_path = st.text_input("Model path", placeholder="models/phi-3-mini-q4_k_m.gguf")
 
-        st.subheader("Processing defaults")
-        default_subject = st.text_input("Default subject", placeholder="General")
-        auto_process = st.toggle("Auto-run AI processing after uploads", value=True)
-        model_path = st.text_input("Local model path", placeholder="models/phi-3-mini-q4_k_m.gguf")
+        st.subheader("OCR status")
+        ocr_status = st.selectbox("Tesseract OCR", ["Not connected", "Available", "Needs configuration"])
+
+        st.subheader("Storage location")
         database_path = st.text_input("Database path", placeholder="data/neuronote.db")
+        uploads_path = st.text_input("Uploads path", placeholder="data/uploads")
+
+        st.subheader("Application information")
+        offline_only = st.toggle("Offline-only mode", value=True)
+        app_version = st.text_input("Version", value="1.0.0", disabled=True)
 
         submitted = st.form_submit_button("Save settings", type="primary")
 
@@ -29,11 +34,12 @@ def render_settings() -> None:
         result = save_settings(
             {
                 "offline_only": offline_only,
-                "telemetry": telemetry,
-                "default_subject": default_subject,
-                "auto_process": auto_process,
+                "model": model,
                 "model_path": model_path,
+                "ocr_status": ocr_status,
                 "database_path": database_path,
+                "uploads_path": uploads_path,
+                "app_version": app_version,
             }
         )
         if result["ok"]:

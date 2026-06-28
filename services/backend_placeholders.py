@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from datetime import date
 from typing import Any
 
 
@@ -12,14 +11,20 @@ def get_app_status() -> dict[str, object]:
     }
 
 
-def get_dashboard_data() -> dict[str, Any]:
+def get_dashboard_stats() -> dict[str, Any]:
     return {
         "metrics": {
             "Documents": "0",
-            "Concepts": "0",
+            "Subjects": "0",
+            "Topics": "0",
             "Quizzes": "0",
-            "Study streak": "0 days",
+            "Revisions": "0",
         },
+        "subjects": [
+            {"subject": "Biology", "completion": 0},
+            {"subject": "Physics", "completion": 0},
+            {"subject": "Chemistry", "completion": 0},
+        ],
         "recent_activity": [
             {"Time": "Pending", "Activity": "Connect backend upload queue", "Status": "Ready"},
             {"Time": "Pending", "Activity": "Connect local search index", "Status": "Ready"},
@@ -34,6 +39,10 @@ def get_dashboard_data() -> dict[str, Any]:
     }
 
 
+def get_dashboard_data() -> dict[str, Any]:
+    return get_dashboard_stats()
+
+
 def get_progress_data() -> dict[str, Any]:
     return {
         "subjects": [
@@ -44,45 +53,56 @@ def get_progress_data() -> dict[str, Any]:
     }
 
 
-def queue_upload(files: list[Any], upload_kind: str, subject: str, tags: list[str], run_ai: bool) -> dict[str, object]:
-    if not files:
-        return {"ok": False, "message": "No files selected."}
-
-    file_count = len(files)
-    noun = "file" if file_count == 1 else "files"
-    return {
-        "ok": True,
-        "message": f"Queued {file_count} {upload_kind} {noun} for local processing.",
-        "metadata": {"subject": subject, "tags": tags, "run_ai": run_ai},
-    }
+def process_document(file: Any, metadata: dict[str, object] | None = None) -> dict[str, object]:
+    return {"ok": True, "message": "Document queued.", "file_name": getattr(file, "name", "document"), "metadata": metadata or {}}
 
 
-def search_knowledge_base(filters: dict[str, object]) -> list[dict[str, object]]:
-    query = str(filters["query"]).strip()
+def process_image(file: Any, metadata: dict[str, object] | None = None) -> dict[str, object]:
+    return {"ok": True, "message": "Image queued.", "file_name": getattr(file, "name", "image"), "metadata": metadata or {}}
+
+
+def process_audio(file: Any, metadata: dict[str, object] | None = None) -> dict[str, object]:
+    return {"ok": True, "message": "Audio queued.", "file_name": getattr(file, "name", "audio"), "metadata": metadata or {}}
+
+
+def search_topics(topic: str, filters: dict[str, object] | None = None) -> list[dict[str, object]]:
+    return _search_results("topic", topic, filters or {})
+
+
+def search_subject(subject: str, filters: dict[str, object] | None = None) -> list[dict[str, object]]:
+    return _search_results("subject", subject, filters or {})
+
+
+def search_keyword(keyword: str, filters: dict[str, object] | None = None) -> list[dict[str, object]]:
+    return _search_results("keyword", keyword, filters or {})
+
+
+def _search_results(search_type: str, value: str, filters: dict[str, object]) -> list[dict[str, object]]:
+    query = value.strip()
     if not query:
         return []
 
     return [
         {
-            "id": "result-1",
-            "title": f"Concept match for '{query}'",
+            "id": f"{search_type}-result-1",
+            "title": f"{search_type.title()} match for '{query}'",
             "subject": "Biology",
             "source": "Backend placeholder",
             "score": 94,
-            "snippet": "Search results will be populated by SQLite FTS or the retrieval backend when connected.",
+            "snippet": "Search results will be returned by backend retrieval when connected.",
         },
         {
-            "id": "result-2",
-            "title": "Related definition",
+            "id": f"{search_type}-result-2",
+            "title": "Related study item",
             "subject": "Physics",
             "source": "Backend placeholder",
             "score": 81,
-            "snippet": "This card demonstrates the final UI contract for ranked search result rendering.",
+            "snippet": f"Filters received by the frontend contract: {filters}",
         },
     ]
 
 
-def get_graph_preview() -> dict[str, Any]:
+def build_knowledge_graph(subject: str | None = None, topic: str | None = None) -> dict[str, Any]:
     return {
         "nodes": [
             {"id": "photosynthesis", "label": "Photosynthesis", "subject": "Biology", "position": [0.1, 0.8]},
@@ -101,7 +121,8 @@ def get_graph_preview() -> dict[str, Any]:
     }
 
 
-def generate_revision_plan(subject: str, exam_date: date, daily_minutes: int, focus: list[str]) -> list[dict[str, object]]:
+def generate_revision_plan(subject: str, exam_date: object, daily_minutes: int, focus: list[str] | None = None) -> list[dict[str, object]]:
+    focus = focus or []
     focus_text = ", ".join(focus) if focus else "core concepts"
     return [
         {
