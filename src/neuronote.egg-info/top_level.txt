@@ -1,0 +1,12 @@
+database
+graph
+ingestion
+llm
+models
+neuronote
+ocr
+parser
+search
+services
+speech
+utils

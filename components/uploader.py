@@ -52,21 +52,51 @@ def render_upload_panel(
             for index, file in enumerate(files, start=1):
                 with progress_slot:
                     render_processing_progress(int(index / len(files) * 100), f"Processing {file.name}")
-                results.append(
-                    processor(
-                        file=file,
-                        metadata={
-                            "kind": upload_kind,
-                            "subject": subject,
-                            "topic": topic,
-                            "notes": notes,
-                        },
+                try:
+                    results.append(
+                        processor(
+                            file=file,
+                            metadata={
+                                "kind": upload_kind,
+                                "subject": subject,
+                                "topic": topic,
+                                "notes": notes,
+                            },
+                        )
                     )
-                )
+                except Exception as exc:
+                    results.append(
+                        {
+                            "ok": False,
+                            "file_name": file.name,
+                            "status": "failed",
+                            "error": str(exc),
+                        }
+                    )
 
         failed = [result for result in results if not result.get("ok", False)]
         if failed:
             notify_error(f"{len(failed)} upload item failed.")
         else:
             notify_success(f"Queued {len(results)} {upload_kind} item(s) for backend processing.")
+        _render_extraction_summary(results)
         backend_response_panel(f"{title} backend responses", results)
+
+
+def _render_extraction_summary(results: list[dict[str, object]]) -> None:
+    for result in results:
+        if not result.get("ok", False):
+            continue
+        source_name = result.get("source_name", "Uploaded file")
+        extracted_chars = int(result.get("extracted_chars") or 0)
+        page_count = int(result.get("page_count") or 0)
+        image_count = int(result.get("image_count") or 0)
+        if extracted_chars > 0:
+            st.success(
+                f"{source_name}: extracted {extracted_chars:,} characters"
+                + (f" from {page_count} page(s)" if page_count else "")
+                + (f" and found {image_count} image(s)" if image_count else "")
+                + "."
+            )
+        else:
+            st.warning(f"{source_name}: no readable text was extracted. This PDF may need OCR or may be image-only.")

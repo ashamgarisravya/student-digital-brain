@@ -5,67 +5,66 @@ import streamlit as st
 from components.cards import backend_response_panel, page_header
 from components.notifications import notify_error, notify_success
 from components.progress import render_processing_progress
-from components.uploader import render_upload_panel
-from services.backend_placeholders import process_audio, process_document, process_image
+from services.backend import process_document
 
 
 def render_upload() -> None:
     page_header(
         "Upload",
-        "Queue PDFs, images, audio, and text for backend processing without changing the UI later.",
+        "Upload a class 5-12 study PDF and label it by class, subject, and lesson before local AI extraction.",
     )
 
-    pdf_tab, image_tab, audio_tab, text_tab = st.tabs(["PDF", "Images", "Audio", "Text"])
+    file = st.file_uploader("Study PDF", type=["pdf"], accept_multiple_files=False)
+    cols = st.columns(3)
+    grade = cols[0].selectbox("Class", [str(value) for value in range(5, 13)], index=5)
+    subject = cols[1].text_input("Subject", placeholder="Example: Biology")
+    topic = cols[2].text_input("Lesson / Unit", placeholder="Example: Unit 1 Diversity")
 
-    with pdf_tab:
-        render_upload_panel(
-            title="PDF intake",
-            help_text="PDF files are passed to process_document().",
-            accepted_types=["pdf"],
-            upload_kind="PDF",
-            processor=process_document,
-        )
+    can_process = file is not None and subject.strip() and topic.strip()
+    if not can_process:
+        st.caption("Select a PDF and enter subject plus lesson/unit. These labels are used by Quiz, Revision, and Search.")
 
-    with image_tab:
-        render_upload_panel(
-            title="Image intake",
-            help_text="Image files are passed to process_image().",
-            accepted_types=["jpg", "jpeg", "png", "tiff", "bmp"],
-            upload_kind="image",
-            processor=process_image,
-        )
-
-    with audio_tab:
-        render_upload_panel(
-            title="Audio intake",
-            help_text="Audio files are passed to process_audio().",
-            accepted_types=["mp3", "wav", "m4a", "ogg"],
-            upload_kind="audio",
-            processor=process_audio,
-            max_files=5,
-        )
-
-    with text_tab:
-        st.subheader("Text intake")
-        st.caption("Direct text notes are wrapped and passed to process_document().")
-        subject = st.text_input("Subject", key="text-subject", placeholder="Example: Biology")
-        topic = st.text_input("Topic", key="text-topic", placeholder="Example: Photosynthesis")
-        text = st.text_area("Paste notes", height=220, placeholder="Paste class notes, definitions, or assignment text.")
-        if st.button("Save text note", type="primary", disabled=not text.strip()):
-            progress_slot = st.empty()
-            with progress_slot:
-                render_processing_progress(0, "Preparing text note")
-            with st.spinner("Sending text to process_document()..."):
+    if st.button("Extract and process PDF", type="primary", disabled=not can_process):
+        progress_slot = st.empty()
+        with progress_slot:
+            render_processing_progress(10, "Saving PDF locally")
+        with st.spinner("Extracting PDF text and asking local Ollama to structure it..."):
+            try:
                 with progress_slot:
-                    render_processing_progress(60, "Calling process_document()")
+                    render_processing_progress(45, "Extracting text")
                 result = process_document(
-                    file={"name": "manual-text-note.txt", "content": text},
-                    metadata={"kind": "text", "subject": subject, "topic": topic},
+                    file=file,
+                    metadata={"class": grade, "grade": grade, "subject": subject.strip(), "topic": topic.strip()},
                 )
                 with progress_slot:
-                    render_processing_progress(100, "Text note queued")
-            if result.get("ok"):
-                notify_success("Text note queued for backend processing.")
+                    render_processing_progress(100, "Stored in SQLite")
+            except Exception as exc:
+                result = {"ok": False, "error": str(exc), "status": "failed"}
+
+        if result.get("ok"):
+            if result.get("cache_hit"):
+                notify_success("This PDF was already processed. Reused cached SQLite data.")
             else:
-                notify_error("Text note could not be queued.")
-            backend_response_panel("Text backend response", result)
+                notify_success("PDF processed and stored locally.")
+        else:
+            notify_error(str(result.get("error", "PDF processing failed.")))
+        _render_pdf_summary(result)
+        backend_response_panel("PDF processing response", result)
+
+
+def _render_pdf_summary(result: dict[str, object]) -> None:
+    if not result.get("ok"):
+        return
+    structured = result.get("structured_json", {})
+    st.subheader("Extraction result")
+    cols = st.columns(4)
+    cols[0].metric("Characters", f"{int(result.get('extracted_chars') or 0):,}")
+    cols[1].metric("Pages", str(result.get("page_count") or 0))
+    cols[2].metric("Topics", str(len(structured.get("topics", [])) if isinstance(structured, dict) else 0))
+    cols[3].metric("Cache", "Hit" if result.get("cache_hit") else "New")
+    if isinstance(structured, dict) and structured.get("summary"):
+        st.info(str(structured["summary"]))
+
+
+if __name__ == "__main__":
+    render_upload()

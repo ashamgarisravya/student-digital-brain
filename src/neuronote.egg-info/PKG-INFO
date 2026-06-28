@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: neuronote
+Version: 0.3.0
+Summary: Offline-first CPU AI study assistant that converts PDFs, images, audio, and text into structured SQLite knowledge.
+Requires-Python: >=3.10
+License-File: LICENSE
+Requires-Dist: PyMuPDF>=1.24
+Requires-Dist: streamlit>=1.36
+Dynamic: license-file

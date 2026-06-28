@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import pandas as pd
 import streamlit as st
 
 
@@ -25,4 +24,9 @@ def render_activity_table(rows: list[dict[str, object]]) -> None:
         st.info("Recent activity will appear here after uploads and study sessions.")
         return
 
-    st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
+    for index, row in enumerate(rows, start=1):
+        with st.container(border=True):
+            cols = st.columns([1, 2, 1])
+            cols[0].caption(str(row.get("Time", f"Item {index}")))
+            cols[1].write(str(row.get("Activity", "Activity")))
+            cols[2].success(str(row.get("Status", "Done")))

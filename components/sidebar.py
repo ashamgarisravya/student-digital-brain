@@ -2,12 +2,10 @@ from __future__ import annotations
 
 import streamlit as st
 
-
 NAV_ITEMS = [
     "Dashboard",
     "Upload",
     "Search",
-    "Knowledge Graph",
     "Quiz Generator",
     "Revision Planner",
     "Settings",
@@ -26,5 +24,5 @@ def render_sidebar(status: dict[str, object]) -> str:
         st.caption(f"Backend: {status['backend']}")
         st.caption(f"Last sync: {status['last_sync']}")
         st.divider()
-        st.caption("Frontend-only app. Backend functions are isolated in `services/backend_placeholders.py`.")
+        st.caption("Local Ollama + SQLite backend. Uploaded PDFs are the only knowledge source.")
     return selected
