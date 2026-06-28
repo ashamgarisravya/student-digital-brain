@@ -1,0 +1,24 @@
+from __future__ import annotations
+
+import pandas as pd
+import streamlit as st
+
+
+def render_subject_progress(progress_rows: list[dict[str, object]]) -> None:
+    if not progress_rows:
+        st.info("Progress data will appear after the backend records study sessions.")
+        return
+
+    for row in progress_rows:
+        subject = str(row["subject"])
+        completion = int(row["completion"])
+        st.write(f"**{subject}**")
+        st.progress(completion, text=f"{completion}% ready")
+
+
+def render_activity_table(rows: list[dict[str, object]]) -> None:
+    if not rows:
+        st.info("Recent activity will appear here after uploads and study sessions.")
+        return
+
+    st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
