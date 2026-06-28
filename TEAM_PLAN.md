@@ -1,137 +1,108 @@
-# NeuroNote — Team Plan
+# NeuroNote – Team Plan
 
 **Version:** 1.0.0  
 **Last Updated:** 2026-06-28
 
 ---
 
-## 1. Team Structure
+## Team Structure
 
 | Aspect | Detail |
 |---|---|
 | **Team Size** | 2 Members |
 | **Hackathon** | CPU-First Offline AI Hackathon |
-| **Repository** | https://code.swecha.org/Bharatg/student-digital-brain |
+| **Project** | NeuroNote – Offline Student Digital Brain |
 
 ---
 
-## 2. Member Assignments
+## Member Responsibilities
 
 ### Member A — Backend Developer
 
-**Role:** Backend & AI Pipeline  
-**Focus:** Data processing, AI inference, database, knowledge graph, testing
-
-| Responsibility | Modules | Technologies |
+| Area | Specific Responsibilities | Technologies |
 |---|---|---|
-| PDF Processing | PDF text and image extraction | PyMuPDF |
-| OCR Pipeline | Image preprocessing, text extraction | Tesseract, OpenCV |
-| Speech-to-Text | Audio transcription | Whisper.cpp |
-| Text Preprocessing | Cleaning, chunking, normalization | Python, regex |
-| LLM Integration | llama.cpp binding, model management | llama.cpp, Phi-3 Mini |
-| Concept Extraction | Prompt engineering, JSON parsing | LLM, JSON |
-| Question Generation | Quiz question creation | LLM |
-| Knowledge Graph | NetworkX construction, similarity | NetworkX, TF-IDF |
-| Database | Schema, queries, FTS5, migrations | SQLite |
-| Unit Tests | Processing and AI modules | pytest |
-| Integration Tests | End-to-end workflow tests | pytest |
-| Performance | Optimization, benchmarking | cProfile |
+| **OCR Pipeline** | Image preprocessing (grayscale, binarization, denoising, deskewing), Tesseract integration, text extraction from handwritten and printed images | Tesseract, OpenCV, pytesseract |
+| **Database** | SQLite schema design (10 tables), connection manager, FTS5 full-text search, query optimization, data persistence | SQLite, sqlite3 |
+| **LLM Integration** | llama.cpp Python bindings, Phi-3 Mini model loading and inference, prompt engineering, context window management, memory optimization | llama.cpp, Phi-3 Mini GGUF |
+| **Knowledge Graph** | NetworkX graph construction, TF-IDF similarity computation, relationship edge creation, graph serialization | NetworkX, scikit-learn |
+| **Testing** | Unit tests for processing and AI modules, integration tests for end-to-end workflows, performance benchmarking | pytest, pytest-cov |
 
 ### Member B — Frontend Developer
 
-**Role:** UI/UX & Application Integration  
-**Focus:** Streamlit interface, search, visualization, documentation
-
-| Responsibility | Modules | Technologies |
+| Area | Specific Responsibilities | Technologies |
 |---|---|---|
-| Streamlit App | Main application entry, navigation | Streamlit |
-| Dashboard | Statistics, recent activity | Streamlit |
-| File Upload | Drag-and-drop, validation, progress | Streamlit |
-| Search Interface | Input, filters, results display | Streamlit, SQLite FTS5 |
-| Quiz Interface | Question display, scoring, history | Streamlit |
-| Revision Planner | Schedule display, export | Streamlit |
-| Knowledge Graph Viewer | Interactive visualization | Plotly/Pyvis, NetworkX |
-| Audio Upload | Recording, file upload, metadata | Streamlit |
-| Export Functionality | JSON download, backup | Python, JSON |
-| Documentation | All docs, README, SPEC, guides | Markdown |
-| Demo Preparation | Script, video recording, submission | - |
+| **Streamlit UI** | Main application entry point, dashboard with statistics, multi-page navigation, session state management | Streamlit |
+| **File Upload** | Drag-and-drop interface, file validation (type, size), metadata input, batch upload support, progress indicators | Streamlit |
+| **Audio Processing** | Audio file upload interface, Whisper.cpp integration UI, transcription status display | Streamlit, Whisper.cpp |
+| **Dashboard** | System statistics display, recent activity feed, subject breakdown, quick navigation links | Streamlit |
+| **Documentation** | README, SPEC, setup guides, user documentation, inline code documentation | Markdown |
+| **Testing** | UI component tests, user workflow validation, cross-browser compatibility | pytest, Streamlit testing |
 
 ---
 
-## 3. Collaboration Strategy
+## Timeline
 
-| Aspect | Approach |
+| Week | Member A (Backend) | Member B (Frontend) |
+|---|---|---|
+| **Week 1** | Repository setup, Python environment, requirements.txt, folder structure | Streamlit scaffold, dashboard page, sidebar navigation |
+| | OCR pipeline with Tesseract integration | File upload interface with drag-and-drop |
+| | Whisper.cpp integration for audio transcription | Metadata input and validation |
+| **Week 2** | SQLite schema design and initialization | Full-text search interface with filters |
+| | llama.cpp integration with Phi-3 Mini | Quiz generation and taking interface |
+| | PDF processing with PyMuPDF | Knowledge graph visualization |
+| | Concept extraction and JSON structuring | Revision planner interface |
+| **Week 3** | Knowledge graph construction with NetworkX | Documentation finalization |
+| | Unit tests for all backend modules | Demo script writing |
+| | Integration tests for end-to-end workflows | Demo video recording and editing |
+| | Performance optimization and benchmarking | Offline functionality verification |
+
+---
+
+## Milestones
+
+| Milestone | Target Date | Deliverable |
+|---|---|---|
+| **M1 — Project Setup Complete** | Week 1, Day 1 | Repository initialized, dependencies installed, folder structure ready |
+| **M2 — Core Processing Functional** | Week 1, Day 4 | PDF extraction, OCR, and audio transcription working with Streamlit upload |
+| **M3 — Database Operational** | Week 2, Day 1 | All 10 SQLite tables created, FTS5 search index active |
+| **M4 — AI Pipeline Integrated** | Week 2, Day 3 | LLM extracts concepts from text, JSON structured output stored in database |
+| **M5 — All Features Complete** | Week 3, Day 1 | Search, knowledge graph, quiz generator, and revision planner fully functional |
+| **M6 — Testing Complete** | Week 3, Day 2 | All unit and integration tests pass, >80% code coverage |
+| **M7 — Submission Ready** | Week 3, Day 3 | Documentation finalized, demo video recorded, offline verification passed |
+
+---
+
+## Communication Plan
+
+| Method | Frequency | Purpose |
+|---|---|---|
+| **Daily Standup** | 15 minutes, every morning | Progress update, blockers, plan for the day |
+| **GitLab Issues** | As needed | Task tracking, bug reports, feature requests |
+| **Code Review** | Every merge request | Ensure code quality and consistency |
+| **Weekly Sync** | 30 minutes, every Friday | Milestone review, adjust priorities, plan next week |
+| **Instant Messaging** | As needed | Quick questions, clarifications, sharing resources |
+
+---
+
+## Risk Management
+
+| Risk | Probability | Impact | Mitigation |
+|---|---|---|---|
+| **llama.cpp integration is more complex than expected** | Medium | High | Start integration early (Week 1). Have a fallback to test with a simpler model. Allocate buffer time. |
+| **OCR quality on handwriting is too low** | Medium | High | Implement multiple preprocessing paths. Allow manual text correction in UI. Have alternative input method (type instead of scan). |
+| **LLM inference too slow on low-end hardware** | Medium | Medium | Optimize chunk size. Test smaller quantized models. Implement caching. Display estimated processing time to users. |
+| **Streamlit limitations for complex UI** | Low | Medium | Prototype key components early. Have alternative visualization libraries (Plotly) ready. Keep UI design within Streamlit capabilities. |
+| **Team member unavailable due to other commitments** | Low | High | Cross-train on critical components. Document all code clearly. Maintain shared understanding of architecture. |
+
+---
+
+## Contribution Strategy
+
+| Principle | Practice |
 |---|---|
-| **Version Control** | GitLab with feature branches, MR review |
-| **Communication** | Daily standup (15 min), GitLab issues |
-| **Code Review** | Both members review all MRs |
-| **Testing** | Member A writes backend tests; Member B writes UI tests |
-| **Integration** | Weekly merge to develop branch |
-| **Documentation** | Member B maintains; Member A reviews technical accuracy |
-
----
-
-## 4. Timeline
-
-```
-WEEK 1-2                    WEEK 3-4                    WEEK 5-6                    WEEK 7-8
-════════════════════════    ════════════════════════    ════════════════════════    ════════════════════════
-PHASE 2: MVP                PHASE 3: AI                 PHASE 4: TESTING            PHASE 5: SUBMISSION
-
-Member A:                   Member A:                   Member A:                   Member A:
-┌────────────────────┐     ┌────────────────────┐     ┌────────────────────┐     ┌────────────────────┐
-│ • Project setup    │     │ • llama.cpp        │     │ • Unit tests       │     │ • Performance      │
-│ • Database schema  │     │ • Concept extract   │     │ • Integration tests│     │   optimization     │
-│ • PDF processing   │     │ • Question gen      │     │ • Bug fixes        │     │ • Final testing    │
-│ • OCR module       │     │ • Knowledge graph   │     │ • Edge cases       │     │ • Code cleanup     │
-│ • Text processing  │     │ • DB optimization   │     │                    │     │                    │
-└────────────────────┘     └────────────────────┘     └────────────────────┘     └────────────────────┘
-
-Member B:                   Member B:                   Member B:                   Member B:
-┌────────────────────┐     ┌────────────────────┐     ┌────────────────────┐     ┌────────────────────┐
-│ • Streamlit setup  │     │ • KG visualization │     │ • UI bug fixes     │     │ • Documentation    │
-│ • Dashboard        │     │ • Quiz interface   │     │ • UX polish        │     │ • Demo prep        │
-│ • Upload interface │     │ • Revision planner │     │ • Error handling   │     │ • Video recording  │
-│ • Basic search     │     │ • Export feature   │     │ • Theme/styling    │     │ • Final review     │
-└────────────────────┘     └────────────────────┘     └────────────────────┘     └────────────────────┘
-```
-
----
-
-## 5. Weekly Milestones
-
-| Week | Member A Deliverables | Member B Deliverables |
-|---|---|---|
-| **Week 1** | Project setup, database schema, PDF processor | Streamlit scaffold, basic dashboard, upload UI |
-| **Week 2** | OCR module, text preprocessing, basic search DB | Search UI with filters, results display |
-| **Week 3** | llama.cpp integration, concept extraction | Knowledge graph visualization (basic) |
-| **Week 4** | Question generation, knowledge graph | Quiz UI, revision planner UI, export |
-| **Week 5** | Unit tests (processing modules) | UI testing, error handling |
-| **Week 6** | Integration tests, bug fixes, edge cases | UX polish, dark mode, responsive design |
-| **Week 7** | Performance optimization, benchmarking | Documentation finalization |
-| **Week 8** | Final testing, code cleanup | Demo script, video recording, submission |
-
----
-
-## 6. Risk Mitigation per Member
-
-| Member | Risk | Mitigation |
-|---|---|---|
-| A | llama.cpp integration complex | Prototype early (Week 1), fallback to simpler model |
-| A | OCR quality poor on handwriting | Multiple preprocessing strategies, user feedback |
-| A | LLM performance too slow | Optimize chunk size, test smaller models |
-| B | Streamlit limitations for graph viz | Evaluate Plotly/Pyvis early, have fallback |
-| B | Search performance issues | Index optimization, query tuning |
-| B | UI complexity exceeds timeline | Prioritize core features, delay nice-to-haves |
-
----
-
-## 7. Tools and Access
-
-| Tool | Purpose | Access |
-|---|---|---|
-| GitLab | Source control, issues, CI/CD | Both members |
-| VS Code | Development IDE | Both members |
-| Python 3.11 | Runtime | Both members |
-| Local Git | Version control | Both members |
-| OBS Studio | Demo recording | Member B |
+| **Branch Strategy** | Feature branches from `develop`. Merge to `main` only at milestones. |
+| **Commit Convention** | Conventional Commits format: `feat:`, `fix:`, `docs:`, `test:` |
+| **Code Review** | Every merge request reviewed by the other team member before merging |
+| **Documentation** | Document as you code. Update README and inline docs with each feature. |
+| **Testing** | Write tests alongside code. Never merge untested code. |
+| **Offline Verification** | Test every feature with network disabled before marking complete. |
