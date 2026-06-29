@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.1 - 2026-06-29
+
+- Switched repository licensing to AGPL-3.0-or-later.
+- Added required user, agent, security, conduct, Docker, and environment documentation.
+- Added spec-kit structure and offline PDF workflow specification.
+- Expanded CI with format, lint, type check, test, coverage, security, and audit stages.
+- Added coverage threshold, secret scanning baseline, and additional quality tool configuration.
+
 ## 0.3.0 - 2026-06-28
 
 - Added PDF-first source metadata for uploaded documents.

@@ -30,7 +30,9 @@ def render_upload_panel(
     )
 
     subject = st.text_input("Subject", placeholder="Example: Biology, Physics, History", key=f"{key_prefix}-subject")
-    topic = st.text_input("Topic", placeholder="Example: Chapter 3, Mechanics, Cell structure", key=f"{key_prefix}-topic")
+    topic = st.text_input(
+        "Topic", placeholder="Example: Chapter 3, Mechanics, Cell structure", key=f"{key_prefix}-topic"
+    )
     notes = st.text_area(
         "Notes",
         placeholder="Optional context for the backend processing step.",

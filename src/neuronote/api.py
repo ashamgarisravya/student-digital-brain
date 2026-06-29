@@ -31,7 +31,9 @@ from .ollama import ollama_generate_json, ollama_status
 from .prompts import search_prompt
 
 
-def process_document(file: Any, metadata: dict[str, object] | None = None, db_path: Path | None = None) -> dict[str, Any]:
+def process_document(
+    file: Any, metadata: dict[str, object] | None = None, db_path: Path | None = None
+) -> dict[str, Any]:
     """Persist a PDF, extract text, call Ollama once, and cache by file hash."""
     metadata = dict(metadata or {})
     original_name, source_path = persist_input_file(file)
@@ -216,7 +218,9 @@ def generate_revision_plan(
     return revision
 
 
-def get_revision_source_data(subject: str = "General", topic: str = "General", db_path: Path | None = None) -> dict[str, Any]:
+def get_revision_source_data(
+    subject: str = "General", topic: str = "General", db_path: Path | None = None
+) -> dict[str, Any]:
     document = _selected_pdf(None, db_path, subject=subject, topic=topic)
     if not document:
         return _empty_revision()
@@ -275,15 +279,21 @@ def search_all(
     return [_format_search_response(response, cached=False)]
 
 
-def search_topics(topic: str, filters: dict[str, object] | None = None, db_path: Path | None = None) -> list[dict[str, Any]]:
+def search_topics(
+    topic: str, filters: dict[str, object] | None = None, db_path: Path | None = None
+) -> list[dict[str, Any]]:
     return search_all(topic=topic, db_path=db_path)
 
 
-def search_subject(subject: str, filters: dict[str, object] | None = None, db_path: Path | None = None) -> list[dict[str, Any]]:
+def search_subject(
+    subject: str, filters: dict[str, object] | None = None, db_path: Path | None = None
+) -> list[dict[str, Any]]:
     return search_all(subject=subject, db_path=db_path)
 
 
-def search_keyword(keyword: str, filters: dict[str, object] | None = None, db_path: Path | None = None) -> list[dict[str, Any]]:
+def search_keyword(
+    keyword: str, filters: dict[str, object] | None = None, db_path: Path | None = None
+) -> list[dict[str, Any]]:
     return search_all(keyword=keyword, db_path=db_path)
 
 
@@ -327,8 +337,7 @@ def get_dashboard_stats(db_path: Path | None = None) -> dict[str, Any]:
         "subjects": [{"subject": item, "completion": 0} for item in subjects],
         "topics": [{"topic": item, "subject": "Uploaded PDF", "items": 1} for item in topic_names],
         "recent_activity": [
-            {"Time": row["created_at"], "Activity": row["source_name"], "Status": "Processed"}
-            for row in documents[:5]
+            {"Time": row["created_at"], "Activity": row["source_name"], "Status": "Processed"} for row in documents[:5]
         ],
         "quick_actions": ["Continue Revision", "Start Quiz", "Search Notes"],
         "next_actions": ["Continue Revision", "Start Quiz", "Search Notes"],
@@ -595,7 +604,12 @@ def _textbook_mcqs(document: dict[str, Any]) -> list[dict[str, Any]]:
         (
             "taxonomy",
             "Taxonomy deals with:",
-            {"A": "Only evolution", "B": "Identification, nomenclature and classification", "C": "Only habitats", "D": "Only fossils"},
+            {
+                "A": "Only evolution",
+                "B": "Identification, nomenclature and classification",
+                "C": "Only habitats",
+                "D": "Only fossils",
+            },
             "B",
             "Taxonomy includes identification, nomenclature and classification of organisms.",
         ),
@@ -739,7 +753,12 @@ def _match_following_questions(document: dict[str, Any], hierarchy: list[str]) -
     if "panthera leo" in text:
         pairs.append(("Panthera leo", "Lion"))
     if not pairs:
-        pairs = [("Genus", "Related species"), ("Family", "Related genera"), ("Order", "Related families"), ("Kingdom", "Highest category")]
+        pairs = [
+            ("Genus", "Related species"),
+            ("Family", "Related genera"),
+            ("Order", "Related families"),
+            ("Kingdom", "Highest category"),
+        ]
     return [
         {
             "question": "Match Column I with Column II.",
@@ -947,9 +966,18 @@ def _fallback_revision(document: dict[str, Any]) -> dict[str, Any]:
         "source": document.get("source_name", "Uploaded PDF"),
         "subject": document.get("subject", "General"),
         "topic": document.get("topic", "General"),
-        "mind_map": {"subject": document.get("subject", "General"), "chapter": document.get("topic", "General"), "topics": topics},
+        "mind_map": {
+            "subject": document.get("subject", "General"),
+            "chapter": document.get("topic", "General"),
+            "topics": topics,
+        },
         "important_topics": [
-            {"title": item["title"], "explanation": item["definition"], "example": "", "why_important": "Marked important from uploaded PDF extraction."}
+            {
+                "title": item["title"],
+                "explanation": item["definition"],
+                "example": "",
+                "why_important": "Marked important from uploaded PDF extraction.",
+            }
             for item in topics[:8]
         ],
         "study_notes": notes,
@@ -1044,16 +1072,32 @@ def _chapter_title(sections: list[dict[str, str]], document: dict[str, Any]) -> 
 
 def _revision_question_bank(sections: list[dict[str, str]], hierarchy: list[str]) -> dict[str, list[dict[str, str]]]:
     important_terms = [
-        ("biodiversity", "What is biodiversity?", "Biodiversity is the number and variety of organisms present on earth."),
-        ("taxonomy", "What is taxonomy?", "Taxonomy is the process of identification, nomenclature and classification of organisms."),
-        ("nomenclature", "What is nomenclature?", "Nomenclature is the process of giving scientific names to organisms."),
+        (
+            "biodiversity",
+            "What is biodiversity?",
+            "Biodiversity is the number and variety of organisms present on earth.",
+        ),
+        (
+            "taxonomy",
+            "What is taxonomy?",
+            "Taxonomy is the process of identification, nomenclature and classification of organisms.",
+        ),
+        (
+            "nomenclature",
+            "What is nomenclature?",
+            "Nomenclature is the process of giving scientific names to organisms.",
+        ),
         ("species", "What is species?", "Species is the basic taxonomic category of similar organisms."),
         ("genus", "What is genus?", "A genus is a group of closely related species."),
         ("family", "What is family?", "A family is a group of related genera."),
         ("order", "What is order?", "An order is a group of related families."),
         ("class", "What is class?", "A class is a group of related orders."),
         ("kingdom", "Which is the highest taxonomic category?", "Kingdom is the highest taxonomic category."),
-        ("binomial", "What is binomial nomenclature?", "Binomial nomenclature is the two-word scientific naming system."),
+        (
+            "binomial",
+            "What is binomial nomenclature?",
+            "Binomial nomenclature is the two-word scientific naming system.",
+        ),
     ]
     text = " ".join(section["excerpt"] for section in sections).lower()
     very_short = [
@@ -1080,7 +1124,9 @@ def _revision_question_bank(sections: list[dict[str, str]], hierarchy: list[str]
         },
         {
             "question": "Write the taxonomic hierarchy.",
-            "answer": " -> ".join(hierarchy) if hierarchy else "Species -> Genus -> Family -> Order -> Class -> Phylum/Division -> Kingdom",
+            "answer": " -> ".join(hierarchy)
+            if hierarchy
+            else "Species -> Genus -> Family -> Order -> Class -> Phylum/Division -> Kingdom",
             "explanation": "This is the order of taxonomic categories from higher to lower or lower to higher depending on presentation.",
         },
         {
@@ -1136,8 +1182,13 @@ def _revision_looks_like_fallback(revision: dict[str, Any]) -> bool:
 def _fallback_search(query: dict[str, str], documents: list[dict[str, Any]]) -> dict[str, Any]:
     terms = [query.get("keyword", "").strip().lower()] if query.get("keyword", "").strip() else []
     keyword = query.get("keyword", "").strip().lower()
-    if not any(query.get(key, "").strip() for key in ["subject", "topic", "keyword", "concept", "definition", "meaning"]):
-        return {"present": False, "explanation": "Enter a subject, topic, keyword, concept, definition, or meaning to search."}
+    if not any(
+        query.get(key, "").strip() for key in ["subject", "topic", "keyword", "concept", "definition", "meaning"]
+    ):
+        return {
+            "present": False,
+            "explanation": "Enter a subject, topic, keyword, concept, definition, or meaning to search.",
+        }
     for document in documents:
         text = str(document.get("raw_text", ""))
         haystack = text.lower()

@@ -55,19 +55,25 @@ def _format_document_result(row: dict[str, Any], keyword: str | None = None, sco
 
 def search_by_topic(topic: str, db_path: Path | None = None) -> list[dict[str, Any]]:
     concept_results = [_format_result(row, 92) for row in search_concepts("topic", topic, db_path)]
-    document_results = [_format_document_result(row, topic, 86) for row in search_documents(topic=topic, db_path=db_path)]
+    document_results = [
+        _format_document_result(row, topic, 86) for row in search_documents(topic=topic, db_path=db_path)
+    ]
     return concept_results + document_results
 
 
 def search_by_subject(subject: str, db_path: Path | None = None) -> list[dict[str, Any]]:
     concept_results = [_format_result(row, 88) for row in search_concepts("subject", subject, db_path)]
-    document_results = [_format_document_result(row, subject, 82) for row in search_documents(subject=subject, db_path=db_path)]
+    document_results = [
+        _format_document_result(row, subject, 82) for row in search_documents(subject=subject, db_path=db_path)
+    ]
     return concept_results + document_results
 
 
 def search_by_keyword(keyword: str, db_path: Path | None = None) -> list[dict[str, Any]]:
     concept_results = [_format_result(row, 95) for row in keyword_search(keyword, db_path)]
-    document_results = [_format_document_result(row, keyword, 90) for row in search_documents(keyword=keyword, db_path=db_path)]
+    document_results = [
+        _format_document_result(row, keyword, 90) for row in search_documents(keyword=keyword, db_path=db_path)
+    ]
     return concept_results + document_results
 
 

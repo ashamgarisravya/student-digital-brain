@@ -6,9 +6,14 @@ __pycache__/
 .uv-cache/
 *.log
 audit-requirements.txt
+bandit-report.json
+.coverage
+coverage.xml
+htmlcov/
 MODEL_STATUS.json
 .venv/
 venv/
 data/
 models/
 tools/
+.pip-cache/

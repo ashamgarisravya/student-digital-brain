@@ -22,7 +22,9 @@ def render_upload() -> None:
 
     can_process = file is not None and subject.strip() and topic.strip()
     if not can_process:
-        st.caption("Select a PDF and enter subject plus lesson/unit. These labels are used by Quiz, Revision, and Search.")
+        st.caption(
+            "Select a PDF and enter subject plus lesson/unit. These labels are used by Quiz, Revision, and Search."
+        )
 
     if st.button("Extract and process PDF", type="primary", disabled=not can_process):
         progress_slot = st.empty()

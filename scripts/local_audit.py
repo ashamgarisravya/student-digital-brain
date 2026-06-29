@@ -67,6 +67,14 @@ def check_required_files() -> None:
         "pyproject.toml",
         ".gitlab-ci.yml",
         ".pre-commit-config.yaml",
+        "USER_MANUAL.md",
+        "AGENTS.md",
+        "SECURITY.md",
+        "CODE_OF_CONDUCT.md",
+        ".env.example",
+        ".editorconfig",
+        "Dockerfile",
+        ".dockerignore",
     ]
     missing = [name for name in required if not (ROOT / name).exists()]
     _require(not missing, f"Missing required files: {missing}")
@@ -74,7 +82,7 @@ def check_required_files() -> None:
 
 def check_license() -> None:
     text = (ROOT / "LICENSE").read_text(encoding="utf-8", errors="ignore")
-    _require("GNU GENERAL PUBLIC LICENSE" in text, "LICENSE must be GPL.")
+    _require("GNU AFFERO GENERAL PUBLIC LICENSE" in text, "LICENSE must be AGPL.")
     _require("Version 3" in text, "LICENSE must be GPL version 3.")
 
 
@@ -103,10 +111,7 @@ def check_sqlite_schema() -> None:
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
         db_path = Path(tmp) / "audit.db"
         with get_connection(db_path) as conn:
-            tables = {
-                row[0]
-                for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
-            }
+            tables = {row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()}
     required = {"documents", "concepts", "quizzes", "revisions", "search_cache"}
     _require(required.issubset(tables), f"SQLite schema missing: {required - tables}")
 
@@ -173,7 +178,9 @@ def check_model_manifest() -> None:
         "installed_models": status["models"],
     }
     (ROOT / "MODEL_STATUS.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
-    _require(settings.ollama_model in SUPPORTED_OLLAMA_MODELS, "Configured Ollama model is not in the supported demo list.")
+    _require(
+        settings.ollama_model in SUPPORTED_OLLAMA_MODELS, "Configured Ollama model is not in the supported demo list."
+    )
     _require(bool(status["available"]), "Ollama is not reachable. Run `ollama serve` before the final demo.")
 
 

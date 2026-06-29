@@ -148,7 +148,9 @@ def _normalize_structured(
         "summary": str(parsed.get("summary") or ""),
         "topics": topics,
         "concepts": concepts,
-        "study_notes": parsed.get("study_notes") if isinstance(parsed.get("study_notes"), dict) else _fallback_study_notes(concepts),
+        "study_notes": parsed.get("study_notes")
+        if isinstance(parsed.get("study_notes"), dict)
+        else _fallback_study_notes(concepts),
         "raw_text": text,
         "engine": engine,
         "source_rule": "Only the uploaded PDF text is used.",

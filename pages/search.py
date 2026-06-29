@@ -51,7 +51,10 @@ def render_search() -> None:
     for result in results:
         with st.container(border=True):
             if not result.get("present"):
-                empty_state("Not found in this PDF lesson", str(result.get("explanation", "The information is not present in the selected uploaded document.")))
+                empty_state(
+                    "Not found in this PDF lesson",
+                    str(result.get("explanation", "The information is not present in the selected uploaded document.")),
+                )
                 backend_response_panel("Search backend response", result.get("backend_response"))
                 continue
 
