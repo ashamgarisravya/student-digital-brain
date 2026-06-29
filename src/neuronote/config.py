@@ -43,12 +43,16 @@ def get_settings() -> Settings:
         whisper_cpp_cmd=os.getenv(
             "NEURONOTE_WHISPER_CPP",
             str(LOCAL_WHISPER) if LOCAL_WHISPER.exists() else "",
-        ) or None,
-        whisper_model_path=Path(whisper_model) if whisper_model else (LOCAL_WHISPER_MODEL if LOCAL_WHISPER_MODEL.exists() else None),
+        )
+        or None,
+        whisper_model_path=Path(whisper_model)
+        if whisper_model
+        else (LOCAL_WHISPER_MODEL if LOCAL_WHISPER_MODEL.exists() else None),
         llama_cpp_cmd=os.getenv(
             "NEURONOTE_LLAMA_CPP",
             str(LOCAL_LLAMA) if LOCAL_LLAMA.exists() else "",
-        ) or None,
+        )
+        or None,
         phi3_model_path=_usable_phi3_model(model_path),
         ollama_host=os.getenv("NEURONOTE_OLLAMA_HOST", DEFAULT_OLLAMA_HOST).rstrip("/"),
         ollama_model=os.getenv("NEURONOTE_OLLAMA_MODEL", "phi3"),

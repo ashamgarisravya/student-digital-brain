@@ -148,7 +148,11 @@ def _render_study_notes(notes: dict[str, object]) -> None:
 
 
 def _render_question_bank(bank: dict[str, object]) -> None:
-    labels = [("very_short", "Very Short Answer Questions"), ("short", "Short Answer Questions"), ("long", "Long Answer Questions")]
+    labels = [
+        ("very_short", "Very Short Answer Questions"),
+        ("short", "Short Answer Questions"),
+        ("long", "Long Answer Questions"),
+    ]
     for key, label in labels:
         with st.expander(label, expanded=key == "very_short"):
             items = bank.get(key, []) if isinstance(bank, dict) else []

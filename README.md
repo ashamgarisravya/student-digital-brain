@@ -1,7 +1,7 @@
 # NeuroNote - Offline Student Digital Brain
 
-![Version](https://img.shields.io/badge/version-0.3.0-blue)
-![License](https://img.shields.io/badge/license-GPL--3.0-green)
+![Version](https://img.shields.io/badge/version-0.3.1-blue)
+![License](https://img.shields.io/badge/license-AGPL--3.0-green)
 ![Python](https://img.shields.io/badge/python-3.10%2B-yellow)
 ![Status](https://img.shields.io/badge/status-MVP-blue)
 
@@ -21,7 +21,7 @@ NeuroNote is a CPU-first, offline-first Streamlit application for transforming a
 | Structured transformation | Implemented with fallback | Ollama generates JSON study notes, quiz, revision, and search answers from the uploaded PDF only. |
 | Local storage | Implemented | `data/neuronote.db` SQLite database. |
 | Graceful failure | Implemented | Missing PDF text/Ollama paths return user-visible status instead of crashing. |
-| Repo audit | Implemented | `.gitlab-ci.yml`, `.pre-commit-config.yaml`, `scripts/local_audit.py`. |
+| Repo audit | Implemented | `.gitlab-ci.yml`, `.pre-commit-config.yaml`, `scripts/local_audit.py`, coverage, security scan, and spec-kit files. |
 
 Important final-demo note: Ollama must be running locally with a supported model such as `llama3`, `phi3`, `mistral`, or `gemma`.
 
@@ -157,7 +157,9 @@ NeuroNote solves this by providing a completely offline, CPU-first pipeline that
 ```
 student-digital-brain/
 ├── README.md                    # Project overview and documentation
-├── LICENSE                      # GPL-3.0 License
+├── LICENSE                      # AGPL-3.0 License
+├── USER_MANUAL.md               # User-facing setup and workflow guide
+├── AGENTS.md                    # Agent and maintainer operating notes
 ├── SPEC.md                      # Technical specification
 ├── CONTRIBUTING.md              # Contribution guidelines
 ├── CHANGELOG.md                 # Version history
@@ -289,13 +291,13 @@ Record the input file size, extracted character count, page count, SQLite row co
 
 ## 📄 License
 
-This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**.
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
 
 ```
 Copyright (C) 2026 NeuroNote Team
 
 This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
+it under the terms of the GNU Affero General Public License as published by
 the Free Software Foundation, either version 3 of the License.
 
 This program is distributed in the hope that it will be useful,

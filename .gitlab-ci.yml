@@ -1,7 +1,17 @@
 stages:
-  - verify
+  - format
+  - lint
+  - type_check
   - test
+  - coverage
+  - security
   - audit
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - when: always
 
 default:
   image: python:3.12-slim
@@ -9,26 +19,41 @@ default:
     - python -m pip install --upgrade pip
     - python -m pip install uv
     - uv sync --dev
+    - python -c "from pathlib import Path; Path('.tmp-test').mkdir(exist_ok=True)"
 
-compile:
-  stage: verify
+format:
+  stage: format
   script:
-    - uv run python -m compileall app.py pages components services src/neuronote tests/test_backend_api.py tests/test_database.py tests/test_e2e_backend.py scripts
+    - uv run ruff format --check app.py pages components services src/neuronote tests/test_backend_api.py tests/test_database.py tests/test_e2e_backend.py scripts
 
-ruff:
-  stage: verify
+lint:
+  stage: lint
   script:
     - uv run ruff check app.py pages components services src/neuronote tests/test_backend_api.py tests/test_database.py tests/test_e2e_backend.py scripts
 
-mypy:
-  stage: verify
+type_check:
+  stage: type_check
   script:
     - uv run mypy
 
-unit_tests:
+test:
   stage: test
   script:
-    - uv run pytest
+    - uv run python -m compileall app.py pages components services src/neuronote tests/test_backend_api.py tests/test_database.py tests/test_e2e_backend.py scripts
+    - uv run pytest --no-cov --basetemp=.tmp-test/unit
+
+coverage:
+  stage: coverage
+  script:
+    - uv run pytest --basetemp=.tmp-test/coverage
+  coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+)%/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+    paths:
+      - coverage.xml
 
 streamlit_smoke:
   stage: test
@@ -39,6 +64,16 @@ offline_pdf_pipeline:
   stage: test
   script:
     - uv run python scripts/local_audit.py offline-pdf
+
+secret_scan:
+  stage: security
+  script:
+    - uv run detect-secrets scan app.py pages components services src/neuronote scripts tests .gitlab-ci.yml pyproject.toml README.md --baseline .secrets.baseline
+
+security_scan:
+  stage: security
+  script:
+    - uv run bandit -q -r app.py pages components services src/neuronote scripts
 
 sqlite_schema:
   stage: audit
@@ -58,10 +93,11 @@ repo_metadata:
     - uv run python scripts/local_audit.py gitignore
     - uv run python scripts/local_audit.py docs-commands
 
-security_scan:
+compliance_configs:
   stage: audit
   script:
-    - uv run bandit -q -r app.py pages components services src/neuronote scripts
+    - |
+      python -c "from pathlib import Path; missing=[p for p in ['.semgrep.yml','.gitleaks.toml','cliff.toml','.specify/constitution.md','specs/offline-pdf-study-workflow/spec.md'] if not Path(p).exists()]; raise SystemExit(('Missing compliance configs: %s' % missing) if missing else 0)"
 
 dependency_audit:
   stage: audit

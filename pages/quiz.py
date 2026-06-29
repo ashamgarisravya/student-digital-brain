@@ -36,7 +36,15 @@ def render_quiz() -> None:
         "Assessment Level",
         ["Full Assessment", "Beginner", "Intermediate", "Advanced", "Easy", "Medium", "Hard"],
     )
-    count_options = {"Beginner": 15, "Intermediate": 25, "Advanced": 30, "Full Assessment": 40, "Easy": 15, "Medium": 20, "Hard": 20}
+    count_options = {
+        "Beginner": 15,
+        "Intermediate": 25,
+        "Advanced": 30,
+        "Full Assessment": 40,
+        "Easy": 15,
+        "Medium": 20,
+        "Hard": 20,
+    }
     question_count = cols[3].number_input(
         "Questions",
         min_value=10,
@@ -84,7 +92,11 @@ def render_quiz() -> None:
         st.rerun()
 
     if st.session_state.quiz_submitted:
-        score = sum(1 for index, question in enumerate(questions, start=1) if answers.get(index) == question.get("correct_answer"))
+        score = sum(
+            1
+            for index, question in enumerate(questions, start=1)
+            if answers.get(index) == question.get("correct_answer")
+        )
         percentage = round(score / len(questions) * 100, 1) if questions else 0
         st.subheader("Score")
         cols = st.columns(3)
@@ -93,7 +105,10 @@ def render_quiz() -> None:
         cols[2].metric("Level", _level_label(percentage))
         st.subheader("Difficulty Breakdown")
         for difficulty, values in _score_by_difficulty(questions, answers).items():
-            st.progress(values["percentage"], text=f"{difficulty}: {values['correct']}/{values['total']} ({values['percentage']}%)")
+            st.progress(
+                values["percentage"],
+                text=f"{difficulty}: {values['correct']}/{values['total']} ({values['percentage']}%)",
+            )
         backend_response_panel("Quiz backend response", questions)
 
     bank = st.session_state.question_bank

@@ -11,4 +11,3 @@ def get_logger(name: str) -> logging.Logger:
             format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
         )
     return logger
-
