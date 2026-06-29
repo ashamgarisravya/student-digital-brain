@@ -1,6 +1,14 @@
 __pycache__/
 *.py[cod]
 .streamlit/
+.pytest_cache/
+.tmp-test/
+.uv-cache/
 *.log
+audit-requirements.txt
+MODEL_STATUS.json
 .venv/
 venv/
+data/
+models/
+tools/

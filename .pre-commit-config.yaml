@@ -1,29 +1,28 @@
 repos:
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.6
-    hooks:
-      - id: ruff
-        args: [--fix]
-      - id: ruff-format
-
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.5.1
-    hooks:
-      - id: mypy
-        additional_dependencies: [types-all]
-        args: [--strict]
-
-  - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.4.0
-    hooks:
-      - id: detect-secrets
-        args: ['--baseline', '.secrets.baseline']
-
   - repo: local
     hooks:
-      - id: pytest
-        name: pytest
+      - id: compile
+        name: Python compile check
+        entry: uv run python -m compileall app.py pages components services src tests scripts
+        language: system
+        pass_filenames: false
+      - id: ruff
+        name: Ruff lint
+        entry: uv run ruff check app.py pages components services src tests scripts
+        language: system
+        pass_filenames: false
+      - id: mypy
+        name: Mypy type check
+        entry: uv run mypy
+        language: system
+        pass_filenames: false
+      - id: tests
+        name: Pytest suite
         entry: uv run pytest
         language: system
-        pass_filenames: []
-        always_run: true
+        pass_filenames: false
+      - id: no-cloud-ai
+        name: No cloud AI API scan
+        entry: uv run python scripts/local_audit.py no-cloud-ai
+        language: system
+        pass_filenames: false

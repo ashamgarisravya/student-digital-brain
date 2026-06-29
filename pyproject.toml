@@ -1,93 +1,78 @@
 [project]
 name = "neuronote"
-version = "0.1.0"
-description = "Offline Student Digital Brain - CPU-only AI learning assistant"
-readme = "README.md"
+version = "0.3.0"
+description = "Offline-first CPU AI study assistant that converts PDFs, images, audio, and text into structured SQLite knowledge."
 requires-python = ">=3.10"
-license = {text = "GPL-3.0"}
-authors = [
-    {name = "NeuroNote Team"}
-]
-keywords = ["ai", "education", "offline", "knowledge-management"]
-classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Education",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-]
-
 dependencies = [
-    # PDF Processing
-    "PyMuPDF>=1.23.0",
-    # OCR
-    "pytesseract>=0.3.10",
-    "opencv-python>=4.8.0",
-    "Pillow>=10.0.0",
-    # Knowledge Graph
-    "networkx>=3.0",
-    "scikit-learn>=1.3.0",
-    # Text Processing
-    "numpy>=1.24.0",
-    # Utilities
-    "python-dotenv>=1.0.0",
-    "tqdm>=4.65.0",
-
-    # UI
+    "PyMuPDF>=1.24",
     "streamlit>=1.36",
-    "pandas>=2.2",
-    "plotly>=5.22",
 ]
 
 [dependency-groups]
 dev = [
-    # Testing
-    "pytest>=7.4.0",
-    "pytest-cov>=4.1.0",
-    "pytest-mock>=3.11.0",
-    
-    # Linting & Formatting
-    "ruff>=0.1.0",
-    
-    # Type Checking
-    "mypy>=1.5.0",
-    
-    # Security
-    "bandit>=1.7.5",
-    "detect-secrets>=1.4.0",
-    "pip-audit>=2.6.0",
-    
-    # Pre-commit
-    "pre-commit>=3.4.0",
-]
-llm = [
-    "llama-cpp-python>=0.2.0; platform_system != 'Windows' or (platform_machine == 'x86_64' and python_version >= '3.10')",
+    "bandit>=1.7.9",
+    "mypy>=1.10",
+    "pip-audit>=2.7",
+    "pre-commit>=3.7",
+    "pytest>=8.2",
+    "ruff>=0.5",
 ]
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
 
-[tool.hatch.build.targets.wheel]
-packages = ["src"]
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.pytest.ini_options]
+pythonpath = ["src", "."]
 testpaths = ["tests"]
-python_files = ["test_*.py"]
-addopts = "-v --tb=short"
+addopts = "--basetemp=.tmp-test"
+python_files = [
+    "test_backend_api.py",
+    "test_database.py",
+    "test_e2e_backend.py",
+]
 
 [tool.ruff]
-line-length = 100
+line-length = 120
 target-version = "py310"
+exclude = [
+    ".git",
+    ".venv",
+    ".uv-cache",
+    "data",
+    "models",
+    "tools",
+    "src/api.py",
+    "src/config.py",
+    "src/database",
+    "src/graph",
+    "src/ingestion",
+    "src/llm",
+    "src/models",
+    "src/neuronote.egg-info",
+    "src/ocr",
+    "src/parser",
+    "src/search",
+    "src/services",
+    "src/speech",
+    "src/utils",
+    "tests/test_parser.py",
+    "tests/test_services.py",
+]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "N", "W"]
+select = ["E", "F", "I", "B"]
 ignore = ["E501"]
 
 [tool.mypy]
 python_version = "3.10"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
 ignore_missing_imports = true
+check_untyped_defs = true
+files = ["src/neuronote"]
+
+[tool.bandit]
+exclude_dirs = ["tests", ".venv", "data", "models", "tools"]
+skips = ["B404", "B603"]

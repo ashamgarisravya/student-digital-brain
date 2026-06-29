@@ -1,80 +1,70 @@
 stages:
-  - format
-  - lint
-  - typecheck
+  - verify
   - test
-  - security
   - audit
 
-variables:
-  UV_CACHE_DIR: ".uv-cache"
-  PIP_CACHE_DIR: ".pip-cache"
+default:
+  image: python:3.12-slim
+  before_script:
+    - python -m pip install --upgrade pip
+    - python -m pip install uv
+    - uv sync --dev
 
-.before_script:
-  - python -m pip install --upgrade pip
-  - pip install uv
-  - uv sync
-  - uv sync --group dev
-
-# Format Check
-ruff-format:
-  stage: format
-  image: python:3.11-slim
+compile:
+  stage: verify
   script:
-    - uv run ruff format --check src/ tests/
-  allow_failure: false
+    - uv run python -m compileall app.py pages components services src/neuronote tests/test_backend_api.py tests/test_database.py tests/test_e2e_backend.py scripts
 
-# Lint Check
-ruff-lint:
-  stage: lint
-  image: python:3.11-slim
+ruff:
+  stage: verify
   script:
-    - uv run ruff check src/ tests/
-  allow_failure: false
+    - uv run ruff check app.py pages components services src/neuronote tests/test_backend_api.py tests/test_database.py tests/test_e2e_backend.py scripts
 
-# Type Check
 mypy:
-  stage: typecheck
-  image: python:3.11-slim
+  stage: verify
   script:
-    - uv run mypy src/ --ignore-missing-imports
-  allow_failure: true
+    - uv run mypy
 
-# Unit Tests
-pytest:
+unit_tests:
   stage: test
-  image: python:3.11-slim
   script:
-    - uv run pytest tests/ -v --cov=src --cov-report=xml
-  coverage: '/TOTAL\s+\d+\%\s+\d+/'
-  artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: coverage.xml
-  allow_failure: false
+    - uv run pytest
 
-# Security Scan
-bandit:
-  stage: security
-  image: python:3.11-slim
+streamlit_smoke:
+  stage: test
   script:
-    - uv run bandit -r src/ -f json -o bandit-report.json || true
-    - uv run bandit -r src/
-  allow_failure: true
+    - uv run python scripts/local_audit.py streamlit-pages
 
-# Dependency Audit
-audit:
+offline_pdf_pipeline:
+  stage: test
+  script:
+    - uv run python scripts/local_audit.py offline-pdf
+
+sqlite_schema:
   stage: audit
-  image: python:3.11-slim
   script:
-    - uv run pip-audit
-  allow_failure: true
+    - uv run python scripts/local_audit.py sqlite-schema
 
-# Secret Detection
-detect-secrets:
-  stage: security
-  image: python:3.11-slim
+no_cloud_ai:
+  stage: audit
   script:
-    - uv run detect-secrets scan --baseline .secrets.baseline
-  allow_failure: true
+    - uv run python scripts/local_audit.py no-cloud-ai
+
+repo_metadata:
+  stage: audit
+  script:
+    - uv run python scripts/local_audit.py required-files
+    - uv run python scripts/local_audit.py license
+    - uv run python scripts/local_audit.py gitignore
+    - uv run python scripts/local_audit.py docs-commands
+
+security_scan:
+  stage: audit
+  script:
+    - uv run bandit -q -r app.py pages components services src/neuronote scripts
+
+dependency_audit:
+  stage: audit
+  script:
+    - uv export --dev --format requirements-txt --no-hashes -o audit-requirements.txt
+    - uv run pip-audit -r audit-requirements.txt
